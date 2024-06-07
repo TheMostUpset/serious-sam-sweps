@@ -50,6 +50,9 @@ function ENT:ExplosionEffects(pos, ang)
 end
 
 function ENT:PhysicsCollide(data, physobj)
+	if self.didHit then return end
+	self.didHit = true
+
 	local start = data.HitPos + data.HitNormal
     local endpos = data.HitPos - data.HitNormal
 	util.Decal("fadingscorch", start, endpos)	
