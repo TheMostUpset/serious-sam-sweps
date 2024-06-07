@@ -1,0 +1,6 @@
+"UnlitGeneric"
+{
+	"$basetexture" "vgui/serioussam/SniperMask"
+	"$vertexalpha" 1
+	"$nolod" 1
+}

@@ -1,0 +1,6 @@
+"UnlitGeneric"
+{
+	"$basetexture" "vgui/serioussam/hud/WGhostBuster"
+	"$translucent" "1"
+	"$nolod" 1
+}

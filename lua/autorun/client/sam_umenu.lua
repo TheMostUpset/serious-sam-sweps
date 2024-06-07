@@ -1,0 +1,16 @@
+local function SS_SettingsPanel(Panel)
+	Panel:AddControl("Label", {Text = "Server"})
+	Panel:AddControl("Slider", {Label = "Ammo Equip Multiplier", Command = "ss_ammomultiplier", Type = "Integer", Min = 0, Max = 10})
+	Panel:AddControl("CheckBox", {Label = "Unlimited Ammo", Command = "ss_unlimitedammo"})
+	Panel:AddControl("Label", {Text = "Client"})
+	Panel:AddControl("CheckBox", {Label = "Fire Lighting", Command = "ss_firelight"})
+	Panel:AddControl("CheckBox", {Label = "HUD", Command = "ss_hud"})
+	Panel:AddControl("CheckBox", {Label = "Show Ammo Icons", Command = "ss_hud_ammoicons"})
+	Panel:AddControl("Slider", {Label = "Crosshair", Command = "ss_crosshair", Type = "Integer", Min = 0, Max = 7})
+end
+
+local function SS_PopulateToolMenu()
+	spawnmenu.AddToolMenuOption("Utilities", "Serious Sam", "SSSettings", "Serious Sam Settings", "", "", SS_SettingsPanel)
+end
+
+hook.Add("PopulateToolMenu", "SS_PopulateToolMenu", SS_PopulateToolMenu)

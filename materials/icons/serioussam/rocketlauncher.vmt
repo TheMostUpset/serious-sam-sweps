@@ -1,0 +1,7 @@
+"UnlitGeneric"
+{
+	"$basetexture" "icons/serioussam/RocketLauncher"
+	"$vertexcolor" "1"
+	"$vertexalpha" "1"
+	"$nolod" 1
+}

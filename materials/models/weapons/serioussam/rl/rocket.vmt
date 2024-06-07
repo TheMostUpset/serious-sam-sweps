@@ -1,0 +1,8 @@
+"VertexLitGeneric"
+{
+	"$basetexture" "models/weapons/serioussam/rl/Rocket"
+	"$envmap" "env_cubemap"
+	"$envmapsaturation" .1
+	"$envmapcontrast" 1
+	"$envmaptint" .5 .5 .5
+}

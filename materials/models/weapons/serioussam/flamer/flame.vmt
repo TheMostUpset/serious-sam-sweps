@@ -1,0 +1,14 @@
+"UnlitGeneric"
+{
+	"$basetexture" "models/weapons/serioussam/flamer/Fire"
+	"$additive" 1
+	"Proxies"
+	{
+		"AnimatedTexture"
+		{
+			"animatedTextureVar" "$basetexture"
+			"animatedTextureFrameNumVar" "$frame"
+			"animatedTextureFrameRate" "40"
+		}
+	}
+}

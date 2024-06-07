@@ -1,0 +1,5 @@
+"UnlitGeneric"
+{
+	"$basetexture" "vgui/entities/weapon_ss_chainsaw"
+	"$nolod" 1 
+}
