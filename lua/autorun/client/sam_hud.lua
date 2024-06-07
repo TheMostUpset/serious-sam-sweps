@@ -1,20 +1,44 @@
-surface.CreateFont("seriousHUDfont", {
-	font = "default",
-	size = ScrH()/12,
-	weight = 600,
-	blursize = 1
-})
+local cvar_enable = CreateClientConVar("ss_hud", 0)
+local cvar_ammoicons = CreateClientConVar("ss_hud_ammoicons", 1)
 
-surface.CreateFont("seriousHUDfontHL2", {
-	font = "HL2MP",
-	size = ScrH()/20,
-	shadow = false
-})
+SeriousHUD = {}
 
-surface.CreateFont("seriousHUDpickuptext", {
-	font = "Roboto",
-	size = ScrH() / 45
-})
+-- you can override these functions in gamemodes to force HUD to be enabled or something
+
+function SeriousHUD:Enabled()
+	return cvar_enable:GetBool()
+end
+
+function SeriousHUD:AmmoIconsEnabled()
+	return cvar_ammoicons:GetBool()
+end
+
+function SeriousHUD:GetHUDScale()
+	return 1
+end
+
+local function CreateSeriousFonts()
+	local scale = SeriousHUD:GetHUDScale()
+
+	surface.CreateFont("seriousHUDfont", {
+		font = "default",
+		size = ScrH()/12 * scale,
+		weight = 600,
+		blursize = 1
+	})
+
+	surface.CreateFont("seriousHUDfontHL2", {
+		font = "HL2MP",
+		size = ScrH()/20 * scale,
+		shadow = false
+	})
+
+	surface.CreateFont("seriousHUDpickuptext", {
+		font = "Roboto",
+		size = ScrH() / 45 * scale
+	})
+end
+CreateSeriousFonts()
 
 local pickuptext
 local pickupamount = 0
@@ -206,208 +230,208 @@ local function SeriousText(t, x, y, c)
 	draw.SimpleText(t, font, x, y, c, TEXT_ALIGN_LEFT)
 end
 
-function SeriousHUD()
-if cvars.Bool("ss_hud") then
-	local client = LocalPlayer()
-	local awep = client:GetActiveWeapon()
-	
-	local size = ScrH() / 14.75
-	local gap_screen = ScrH() / 80
-	local gap_rect = 7
-	local y = ScrH() - size - gap_screen
-	local armor_y = y * .908
-	local widerect_w = size * 2.42
-	local widerectleft_x = size + gap_screen + gap_rect
-	local text_align_y = size / 5
-	
-	local cntr = widerectleft_x + widerect_w + ScrW() / 8 - 52
-	local ammorectx = cntr + size + gap_rect
-	local ammoiconrectx = ammorectx + widerect_w + gap_rect
-	
-	local hudr, hudg, hudb = 90, 120, 180
-	local rect, recta = 0, 160
-	
-	local armor = client:Alive() and client:Armor() or 0
-
-	surface.SetDrawColor(rect, rect, rect, recta)
-	surface.DrawRect(gap_screen +health_jit_x, y +health_jit_y, size, size)
-	surface.DrawRect(widerectleft_x, y, widerect_w, size)
-	if armor > 0 then
-		surface.DrawRect(gap_screen +armor_jit_x, armor_y +armor_jit_y, size, size)
-		surface.DrawRect(widerectleft_x, armor_y, widerect_w, size)
-	end
-	surface.SetDrawColor(hudr, hudg, hudb, 255)
-	surface.DrawOutlinedRect(gap_screen +health_jit_x, y +health_jit_y, size, size)
-	surface.DrawOutlinedRect(widerectleft_x, y, widerect_w, size)
-	if armor > 0 then
-		surface.DrawOutlinedRect(gap_screen +armor_jit_x, armor_y +armor_jit_y, size, size)
-		surface.DrawOutlinedRect(widerectleft_x, armor_y, widerect_w, size)
-	end
-	
-	
-	//hp
-	
-	local hp = math.max(client:Health(), 0)
-
-	local hpcolr = 255
-	local hpcolg = 230
-	local hpcolb = 0
-	if hp > 100 then
-		hpcolr = 100
-		hpcolg = 255
-		hpcolb = 100
-	elseif hp <= 50 and hp > 25 then
-		hpcolg = 120
-	elseif hp <= 25 then
-		hpcolg = 0
-	end
-
-	if math.min(RealTime() - healthchangetime + .75, 0) != 0 then
-		hpcolr = 255
-		hpcolg = 255
-		hpcolb = 255
-	end
-	
-	local iccol = 255
-	
-	if hp <= 10 then
-		iccol = math.max(math.sin(RealTime() * 12.5) * 4000, 40)
-	end
-	
-	surface.SetTexture(t_hearth)
-	surface.SetDrawColor(iccol, iccol, iccol, 255)
-	surface.DrawTexturedRect(gap_screen +health_jit_x, y +health_jit_y, size, size)	
-	
-	surface.SetFont("seriousHUDfont")
-	local textsize_w, textsize_h = surface.GetTextSize(hp)
-	SeriousText(hp, (widerectleft_x) + (widerect_w - textsize_w) / 2, y - text_align_y, Color(hpcolr, hpcolg, hpcolb, 255))
-	
-	OnHealthNumChange(client, hp)
-	
-	//armor
-	
-	if armor > 0 then
-		surface.SetTexture(ArMedium)
-		surface.SetDrawColor(255, 255, 255, 255)
-		surface.DrawTexturedRect(gap_screen +armor_jit_x, armor_y +armor_jit_y, size, size)
-		local textsize_w, textsize_h = surface.GetTextSize(armor)
-		SeriousText(armor, (widerectleft_x) + (widerect_w - textsize_w) / 2, armor_y - text_align_y, Color(255, 230, 0, 255))
-	end
-	OnArmorNumChange(client, armor)	
-	
-	//ammo
-	
-	if awep != NULL then
-	
-		local curammo = awep:GetPrimaryAmmoType()
+function SeriousHUD:Draw()
+	if SeriousHUD:Enabled() then
+		local client = LocalPlayer()
+		local awep = client:GetActiveWeapon()
 		
+		local size = ScrH() / 14.75 * SeriousHUD:GetHUDScale()
+		local gap_screen = ScrH() / 80
+		local gap_rect = 7
+		local y = ScrH() - size - gap_screen
+		local armor_y = y * .908
+		local widerect_w = size * 2.42
+		local widerectleft_x = size + gap_screen + gap_rect
+		local text_align_y = size / 5
+		
+		local cntr = widerectleft_x + widerect_w + ScrW() / 8 - 52
+		local ammorectx = cntr + size + gap_rect
+		local ammoiconrectx = ammorectx + widerect_w + gap_rect
+		
+		local hudr, hudg, hudb = 90, 120, 180
+		local rect, recta = 0, 160
+		
+		local armor = client:Alive() and client:Armor() or 0
+
 		surface.SetDrawColor(rect, rect, rect, recta)
-		surface.DrawRect(cntr +ammo_jit_x, y +ammo_jit_y, size, size)
-		if curammo != -1 then
-			surface.DrawRect(ammorectx, y, widerect_w, size)
-			surface.DrawRect(ammoiconrectx, y, size, size)
+		surface.DrawRect(gap_screen +health_jit_x, y +health_jit_y, size, size)
+		surface.DrawRect(widerectleft_x, y, widerect_w, size)
+		if armor > 0 then
+			surface.DrawRect(gap_screen +armor_jit_x, armor_y +armor_jit_y, size, size)
+			surface.DrawRect(widerectleft_x, armor_y, widerect_w, size)
 		end
 		surface.SetDrawColor(hudr, hudg, hudb, 255)
-		surface.DrawOutlinedRect(cntr +ammo_jit_x, y +ammo_jit_y, size, size)
-		if curammo != -1 then
-			surface.DrawOutlinedRect(ammorectx, y, widerect_w, size)
-			surface.DrawOutlinedRect(ammoiconrectx, y, size, size)
+		surface.DrawOutlinedRect(gap_screen +health_jit_x, y +health_jit_y, size, size)
+		surface.DrawOutlinedRect(widerectleft_x, y, widerect_w, size)
+		if armor > 0 then
+			surface.DrawOutlinedRect(gap_screen +armor_jit_x, armor_y +armor_jit_y, size, size)
+			surface.DrawOutlinedRect(widerectleft_x, armor_y, widerect_w, size)
+		end
+		
+		
+		//hp
+		
+		local hp = math.max(client:Health(), 0)
+
+		local hpcolr = 255
+		local hpcolg = 230
+		local hpcolb = 0
+		if hp > 100 then
+			hpcolr = 100
+			hpcolg = 255
+			hpcolb = 100
+		elseif hp <= 50 and hp > 25 then
+			hpcolg = 120
+		elseif hp <= 25 then
+			hpcolg = 0
 		end
 
-		local class = awep:GetClass()
+		if math.min(RealTime() - healthchangetime + .75, 0) != 0 then
+			hpcolr = 255
+			hpcolg = 255
+			hpcolb = 255
+		end
 		
-		local wicn = weps[class]
-		local hl2 = hl2weapons[class]
-		if wicn then		
-			surface.SetTexture(wicn)
+		local iccol = 255
+		
+		if hp <= 10 then
+			iccol = math.max(math.sin(RealTime() * 12.5) * 4000, 40)
+		end
+		
+		surface.SetTexture(t_hearth)
+		surface.SetDrawColor(iccol, iccol, iccol, 255)
+		surface.DrawTexturedRect(gap_screen +health_jit_x, y +health_jit_y, size, size)	
+		
+		surface.SetFont("seriousHUDfont")
+		local textsize_w, textsize_h = surface.GetTextSize(hp)
+		SeriousText(hp, (widerectleft_x) + (widerect_w - textsize_w) / 2, y - text_align_y, Color(hpcolr, hpcolg, hpcolb, 255))
+		
+		OnHealthNumChange(client, hp)
+		
+		//armor
+		
+		if armor > 0 then
+			surface.SetTexture(ArMedium)
 			surface.SetDrawColor(255, 255, 255, 255)
-			surface.DrawTexturedRect(cntr +ammo_jit_x, y +ammo_jit_y, size, size)
-		elseif hl2 then		
-			draw.SimpleText(hl2, "seriousHUDfontHL2", cntr+size/2 +ammo_jit_x, y*1.05 +ammo_jit_y, Color(255, 230, 180, 255), TEXT_ALIGN_CENTER, 1)
-		end	
-		
-		local atype = awep:GetPrimaryAmmoType()
-		local anum = client:GetAmmoCount(atype)
-		local clipammo = awep:Clip1()
-		local ammotexture
-
-		local ammocount
-		if clipammo == -1 then
-			ammocount = anum
-		else
-			ammocount = clipammo + anum
+			surface.DrawTexturedRect(gap_screen +armor_jit_x, armor_y +armor_jit_y, size, size)
+			local textsize_w, textsize_h = surface.GetTextSize(armor)
+			SeriousText(armor, (widerectleft_x) + (widerect_w - textsize_w) / 2, armor_y - text_align_y, Color(255, 230, 0, 255))
 		end
+		OnArmorNumChange(client, armor)	
 		
-		local ammonumcol = 230
-		local ammoiconcol = 255
-		local findammotype = awep:IsScripted() and ammoicons[awep.Primary.Ammo] or ammoicons[atype]
-		if findammotype and awep:IsScripted() and (awep.Base == "weapon_ss_base" or awep.Base == "weapon_sshd_base") then
-			if ammocount <= math.ceil(findammotype.maxammo / 3.5) then
-				ammonumcol = 120
+		//ammo
+		
+		if awep != NULL then
+		
+			local curammo = awep:GetPrimaryAmmoType()
+			
+			surface.SetDrawColor(rect, rect, rect, recta)
+			surface.DrawRect(cntr +ammo_jit_x, y +ammo_jit_y, size, size)
+			if curammo != -1 then
+				surface.DrawRect(ammorectx, y, widerect_w, size)
+				surface.DrawRect(ammoiconrectx, y, size, size)
 			end
-			if ammocount <= math.ceil(findammotype.maxammo / 8) then
+			surface.SetDrawColor(hudr, hudg, hudb, 255)
+			surface.DrawOutlinedRect(cntr +ammo_jit_x, y +ammo_jit_y, size, size)
+			if curammo != -1 then
+				surface.DrawOutlinedRect(ammorectx, y, widerect_w, size)
+				surface.DrawOutlinedRect(ammoiconrectx, y, size, size)
+			end
+
+			local class = awep:GetClass()
+			
+			local wicn = weps[class]
+			local hl2 = hl2weapons[class]
+			if wicn then		
+				surface.SetTexture(wicn)
+				surface.SetDrawColor(255, 255, 255, 255)
+				surface.DrawTexturedRect(cntr +ammo_jit_x, y +ammo_jit_y, size, size)
+			elseif hl2 then		
+				draw.SimpleText(hl2, "seriousHUDfontHL2", cntr+size/2 +ammo_jit_x, y*1.05 +ammo_jit_y, Color(255, 230, 180, 255), TEXT_ALIGN_CENTER, 1)
+			end	
+			
+			local atype = awep:GetPrimaryAmmoType()
+			local anum = client:GetAmmoCount(atype)
+			local clipammo = awep:Clip1()
+			local ammotexture
+
+			local ammocount
+			if clipammo == -1 then
+				ammocount = anum
+			else
+				ammocount = clipammo + anum
+			end
+			
+			local ammonumcol = 230
+			local ammoiconcol = 255
+			local findammotype = awep:IsScripted() and ammoicons[awep.Primary.Ammo] or ammoicons[atype]
+			if findammotype and awep:IsScripted() and (awep.Base == "weapon_ss_base" or awep.Base == "weapon_sshd_base") then
+				if ammocount <= math.ceil(findammotype.maxammo / 3.5) then
+					ammonumcol = 120
+				end
+				if ammocount <= math.ceil(findammotype.maxammo / 8) then
+					ammonumcol = 0
+				end
+				if ammocount <= math.floor(findammotype.maxammo / 15) then
+					ammoiconcol = math.max(math.sin(RealTime() *12.5) *4000, 40)
+				end
+			end
+			if ammocount <= 0 then
 				ammonumcol = 0
-			end
-			if ammocount <= math.floor(findammotype.maxammo / 15) then
 				ammoiconcol = math.max(math.sin(RealTime() *12.5) *4000, 40)
 			end
-		end
-		if ammocount <= 0 then
-			ammonumcol = 0
-			ammoiconcol = math.max(math.sin(RealTime() *12.5) *4000, 40)
+			
+			if curammo != -1 then
+				surface.SetFont("seriousHUDfont")
+				local textsize_w, textsize_h = surface.GetTextSize(ammocount)
+				SeriousText(ammocount, ammorectx + (widerect_w - textsize_w) / 2, y - text_align_y, Color(255, ammonumcol, 0, 255))
+				OnAmmoNumChange(client, ammocount)
+			else
+				ammo_jit_x = 0
+				ammo_jit_y = 0
+			end
+			
+			if findammotype then
+				surface.SetTexture(findammotype.icon)
+				surface.SetDrawColor(ammoiconcol, ammoiconcol, ammoiconcol, 255)
+				surface.DrawTexturedRect(ammoiconrectx, y, size, size)
+			end
+		
 		end
 		
-		if curammo != -1 then
-			surface.SetFont("seriousHUDfont")
-			local textsize_w, textsize_h = surface.GetTextSize(ammocount)
-			SeriousText(ammocount, ammorectx + (widerect_w - textsize_w) / 2, y - text_align_y, Color(255, ammonumcol, 0, 255))
-			OnAmmoNumChange(client, ammocount)
-		else
-			ammo_jit_x = 0
-			ammo_jit_y = 0
-		end
-		
-		if findammotype then
-			surface.SetTexture(findammotype.icon)
-			surface.SetDrawColor(ammoiconcol, ammoiconcol, ammoiconcol, 255)
-			surface.DrawTexturedRect(ammoiconrectx, y, size, size)
-		end
-	
-	end
-	
-	//ammo icons
-	if cvars.Bool("ss_hud_ammoicons") then	
-		local ammosize = size/1.25
-		local ammoy = y+ammosize/4
-		local icon_gap = 5.5
-		local iconpos = ScrW() - gap_screen + icon_gap + 1
-		for k,v in ipairs(ammoicons_list) do
-			local ammoc = client:GetAmmoCount(v)
-			if ammoc > 0 then
-				OnAmmoNumIconChange(client, ammoc, k)
-				iconpos = iconpos - ammosize - icon_gap
-				surface.SetDrawColor(rect, rect, rect, recta)
-				surface.DrawRect(iconpos, ammoy+client:GetVar("ammo_icon_jit"..k, 0), ammosize, ammosize)
-				surface.SetDrawColor(hudr, hudg, hudb, 255)
-				surface.DrawOutlinedRect(iconpos, ammoy+client:GetVar("ammo_icon_jit"..k, 0), ammosize, ammosize)
-				
-				surface.SetTexture(ammoicons[v].icon)
-				surface.SetDrawColor(255, 255, 255, 255)
-				surface.DrawTexturedRect(iconpos+2, ammoy+2+client:GetVar("ammo_icon_jit"..k, 0), ammosize/1.075, ammosize/1.075)
-				
-				local ammocolr, ammocolg, ammocolb = 255, math.min(ammosize / (ammoicons[v].maxammo / ammoc), ammosize), 0
-				local ammobar = ammocolg/1.125
-				if math.min(RealTime() -client:GetVar("ammochangetimeIcon"..k, 0)+.75, 0) != 0 then
-					ammocolr = 255
-					ammocolg = 255
-					ammocolb = 255
+		//ammo icons
+		if SeriousHUD:AmmoIconsEnabled() then
+			local ammosize = size/1.25
+			local ammoy = y+ammosize/4
+			local icon_gap = 5.5
+			local iconpos = ScrW() - gap_screen + icon_gap + 1
+			for k,v in ipairs(ammoicons_list) do
+				local ammoc = client:GetAmmoCount(v)
+				if ammoc > 0 then
+					OnAmmoNumIconChange(client, ammoc, k)
+					iconpos = iconpos - ammosize - icon_gap
+					surface.SetDrawColor(rect, rect, rect, recta)
+					surface.DrawRect(iconpos, ammoy+client:GetVar("ammo_icon_jit"..k, 0), ammosize, ammosize)
+					surface.SetDrawColor(hudr, hudg, hudb, 255)
+					surface.DrawOutlinedRect(iconpos, ammoy+client:GetVar("ammo_icon_jit"..k, 0), ammosize, ammosize)
+					
+					surface.SetTexture(ammoicons[v].icon)
+					surface.SetDrawColor(255, 255, 255, 255)
+					surface.DrawTexturedRect(iconpos+2, ammoy+2+client:GetVar("ammo_icon_jit"..k, 0), ammosize/1.075, ammosize/1.075)
+					
+					local ammocolr, ammocolg, ammocolb = 255, math.min(ammosize / (ammoicons[v].maxammo / ammoc), ammosize), 0
+					local ammobar = ammocolg/1.125
+					if math.min(RealTime() -client:GetVar("ammochangetimeIcon"..k, 0)+.75, 0) != 0 then
+						ammocolr = 255
+						ammocolg = 255
+						ammocolb = 255
+					end
+					surface.SetDrawColor(ammocolr, ammocolg*4.25, ammocolb, 220)
+					surface.DrawRect(iconpos+ammosize/1.375, ammoy+ammosize/1.06-math.floor(ammobar)+client:GetVar("ammo_icon_jit"..k, 0), ammosize/4.75, ammobar)
 				end
-				surface.SetDrawColor(ammocolr, ammocolg*4.25, ammocolb, 220)
-				surface.DrawRect(iconpos+ammosize/1.375, ammoy+ammosize/1.06-math.floor(ammobar)+client:GetVar("ammo_icon_jit"..k, 0), ammosize/4.75, ammobar)
 			end
 		end
 	end
-end
 
 	if pickuptext and pickuptextTime and pickuptextTime > RealTime() then
 		local text = pickupamount > 0 and pickuptext.." +".. pickupamount or pickuptext
@@ -416,7 +440,7 @@ end
 		draw.SimpleText(text, "seriousHUDpickuptext", ScrW() / 2, ScrH() / 1.24, Color(255, 255, 255, 255), TEXT_ALIGN_CENTER)
 	end
 end
-hook.Add("HUDPaint", "SeriousHUD", SeriousHUD)
+hook.Add("HUDPaint", "SeriousHUD", SeriousHUD.Draw)
 
 local tohide = {
 	["CHudHealth"] = true,
@@ -426,10 +450,8 @@ local tohide = {
 }
 
 local function HUDShouldDraw(name)
-	if cvars.Bool("ss_hud") then
-		if (tohide[name]) then
-			return false
-		end
+	if SeriousHUD:Enabled() and tohide[name] then
+		return false
 	end
 end
 
