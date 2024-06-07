@@ -23,18 +23,14 @@ function SWEP:PrimaryAttack()
 	if SERVER then
 		local pos = self.Owner:GetShootPos()
 		local ang = self.Owner:GetAimVector():Angle()
-		pos = pos +ang:Right() *1 +ang:Up() *-7 +ang:Forward() *-9
+		pos = pos +ang:Right() *1 -ang:Up() *7 -ang:Forward() *9
 		local ent = ents.Create("ss_rocket")
 		ent:SetAngles(ang)
 		ent:SetPos(pos)
 		ent:SetOwner(self.Owner)
 		ent:SetDamage(self.Primary.Damage)
+		ent:SetVelocity(ang:Up() *40 +ang:Forward() *1500)
 		ent:Spawn()
-		ent:Activate()
-		local phys = ent:GetPhysicsObject()
-		if IsValid(phys) then
-			phys:SetVelocity(ang:Up() *40 +ang:Forward() *1500)
-		end
 	end
 	self:HolsterDelay()
 end

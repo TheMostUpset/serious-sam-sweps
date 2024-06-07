@@ -4,13 +4,14 @@ AddCSLuaFile("shared.lua")
 include("shared.lua")
 
 ENT.Model = Model("models/projectiles/serioussam/rocket.mdl")
+ENT.FlySound = Sound("weapons/serioussam/RocketFly.wav")
 
 function ENT:Initialize()
 	self:SetModel(self.Model)
+	self:SetMoveType(MOVETYPE_FLY)
+	self:SetSolid(SOLID_BBOX)
+	self:SetCollisionBounds(Vector(), Vector())
 	self:SetCollisionGroup(COLLISION_GROUP_PROJECTILE)
-	self:PhysicsInit(SOLID_VPHYSICS)
-	self:SetMoveType(MOVETYPE_VPHYSICS)
-	self:SetSolid(SOLID_CUSTOM)
 
 	local glow = ents.Create("env_sprite")
 	glow:SetKeyValue("rendercolor","255 180 60")
@@ -25,20 +26,8 @@ function ENT:Initialize()
 	glow:SetParent(self)
 	glow:SetPos(self:GetPos())
 	self:SetRenderMode(RENDERMODE_TRANSALPHA)
-
-	//util.SpriteTrail(self, 0, Color(200, 200, 200), false, 10, 46, .5, 1 / 150, "trails/smoke.vmt")
 	
-	local phys = self:GetPhysicsObject()
-	if IsValid(phys) then
-		phys:Wake()
-		phys:SetMass(1)
-		phys:EnableDrag(false)
-		phys:EnableGravity(false)
-		phys:SetBuoyancyRatio(0)
-	end
-	
-	self.flysound = CreateSound(self, "weapons/serioussam/RocketFly.wav")
-	self.flysound:Play()
+	self:EmitSound(self.FlySound)
 	ParticleEffectAttach("rocket_smoke_trail", PATTACH_ABSORIGIN_FOLLOW, self, 0)
 end
 
@@ -66,35 +55,42 @@ function ENT:ExplosionEffects(pos, norm)
 	util.Effect("ss_expparticles", explosion)
 end
 
-function ENT:Explode(exppos, norm)
-	local tr = util.TraceHull({
-		start = self:GetPos(),
-		endpos = exppos,
-		filter = self
-	})	
-	local pos = tr.HitPos
-
-	self:ExplosionEffects(pos, norm)
+function ENT:Explode(pos, norm)
+	self:ExplosionEffects(pos + norm * 2, norm)
 	self:EmitSound("weapons/serioussam/Explosion02.wav", 100, 100)
-	util.BlastDamage(self, self:GetOwner(), pos, 256, self.Damage)
+	
+	local owner = IsValid(self.Owner) and self.Owner or self
+	local dmg = DamageInfo()
+	dmg:SetInflictor(self)
+	dmg:SetAttacker(owner)
+	dmg:SetDamage(self.Damage)
+	dmg:SetDamageType(bit.bor(DMG_BLAST, DMG_AIRBOAT))
+	util.BlastDamageInfo(dmg, pos, 256)
+	
 	self:Remove()
 end
 
-function ENT:PhysicsCollide(data, physobj)
-	local start = data.HitPos + data.HitNormal
-    local endpos = data.HitPos - data.HitNormal
-	util.Decal("Scorch", start, endpos)
+function ENT:Touch(ent)
+	if !ent:IsSolid() then return end
+
+	if self.didHit then return end
+	self.didHit = true
 	
-	local hitent = data.HitEntity
-	local pos = hitent:Health() > 0 and hitent:GetPos() or data.HitPos
-	self:Explode(pos, data.HitNormal)
+	local tr = self:GetTouchTrace()
+	
+	local start = tr.HitPos - tr.HitNormal
+    local endpos = tr.HitPos + tr.HitNormal
+	if tr.HitWorld then
+		util.Decal("Scorch", start, endpos)
+	end
+
+	self:Explode(tr.HitPos, tr.HitNormal)
 end
 
 function ENT:OnRemove()
-	if self.flysound then self.flysound:Stop() end
+	self:StopSound(self.FlySound)
 end
 
 function ENT:Think()
-	local phys = self:GetPhysicsObject()
-	if IsValid(phys) then phys:SetVelocity(self:GetAngles():Forward() *1024) return end
+	self:SetLocalVelocity(self:GetForward() * 1024)
 end
