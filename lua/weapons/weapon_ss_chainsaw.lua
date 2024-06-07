@@ -113,7 +113,7 @@ function SWEP:Melee()
 				effectdata:SetRadius(1)
 				util.Effect("Sparks", effectdata, true, true)
 			end
-		elseif tr.Entity:IsNPC() or tr.Entity:IsPlayer() then
+		elseif self:IsCreature(tr.Entity) then
 			hitsnd = self.HitSound2
 		end
 		if SERVER then

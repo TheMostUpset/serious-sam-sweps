@@ -28,6 +28,7 @@ end
 
 function EFFECT:Render()
 	if self.HitPos and self.Pos:Distance(self.HitPos) <= 32 then
+		local frametime = FrameTime()
 		self.Pos = self.HitPos + self.Normal*frametime*1200 +self.Normal:Angle():Up()*frametime*self.Size/1.85
 	end
 

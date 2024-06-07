@@ -16,7 +16,8 @@ end
 
 function EFFECT:Render()
 	local col = 255 * -self.DieTime *2 +714
-	self:SetModelScale(self.Size, 0)
+	local scale = math.max(self.Size, .000001)
+	self:SetModelScale(scale, 0)
 	self:SetColor(Color(col,col,col))
 	self:DrawModel()
 end

@@ -12,8 +12,7 @@ end
 
 function EFFECT:Think()
 	self.DieTime = self.DieTime - FrameTime()
-	if self.DieTime <= 0 then return false end	
-	return true
+	return self.DieTime > 0
 end
 
 function EFFECT:Render()

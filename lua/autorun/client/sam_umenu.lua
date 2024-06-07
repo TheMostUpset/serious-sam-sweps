@@ -1,6 +1,7 @@
 local function SS_SettingsPanel(Panel)
 	Panel:AddControl("Label", {Text = "Server"})
 	Panel:AddControl("Slider", {Label = "Ammo Equip Multiplier", Command = "ss_ammomultiplier", Type = "Integer", Min = 0, Max = 10})
+	Panel:AddControl("CheckBox", {Label = "Player Sounds (Sam Classic models)", Command = "ss_playersounds"})
 	Panel:AddControl("CheckBox", {Label = "Unlimited Ammo", Command = "ss_unlimitedammo"})
 	Panel:AddControl("Label", {Text = "Client"})
 	Panel:AddControl("CheckBox", {Label = "Fire Lighting", Command = "ss_firelight"})

@@ -83,7 +83,7 @@ function SWEP:SpecialThink()
 							endpos = v:GetPos(),
 							filter = {self.Owner, tr.Entity}
 						})
-						if IsValid(trace.Entity) and trace.Entity == v and (trace.Entity:IsNPC() or trace.Entity:IsPlayer()) then
+						if IsValid(trace.Entity) and trace.Entity == v and self:IsCreature(trace.Entity) then
 							trace.Entity:Ignite(7)
 							trace.Entity:TakeDamageInfo(dmginfo)
 						end

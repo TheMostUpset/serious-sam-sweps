@@ -6,11 +6,8 @@ if SERVER then
 	SWEP.AutoSwitchFrom		= false
 	CreateConVar("ss_ammomultiplier", 3, FCVAR_ARCHIVE, "Multiplier for additional ammo on weapon pickup\n Any positive number, 0 - disabled")
 	CreateConVar("ss_enableholsterdelay", 1, FCVAR_ARCHIVE)
-	CreateConVar("ss_unlimitedammo", 0)
 
-end
-
-if CLIENT then
+else
 
 	SWEP.DrawAmmo			= true
 	SWEP.DrawCrosshair		= false
@@ -18,12 +15,11 @@ if CLIENT then
 	SWEP.ViewModelFOV		= 60
 	SWEP.BobScale			= 0
 	SWEP.SwayScale			= .1
-	CreateClientConVar("ss_crosshair", 1)
 	CreateClientConVar("ss_firelight", 1)
-	CreateClientConVar("ss_hud", 0)
-	CreateClientConVar("ss_hud_ammoicons", 1)
 
 end
+
+local cvar_unlimitedammo = CreateConVar("ss_unlimitedammo", 0, {FCVAR_NOTIFY, FCVAR_REPLICATED}, "Unlimited ammo for Serious Sam weapons", 0, 1)
 
 game.AddAmmoType({
 	name = "cannonball"
@@ -55,7 +51,7 @@ SWEP.EnableSmoke			= false
 
 SWEP.DeployDelay			= 1.6
 
-SWEP.EnableIdle				= false
+SWEP.EnableIdle				= false -- lua-based idle anim imitation (bad variable name actually)
 
 SWEP.LaserPos				= false
 
@@ -225,21 +221,22 @@ function SWEP:Think()
 		self:SetHolsterTime(0)
 	end
 	
-	if self.EnableIdle then return end
-	local idle = self:GetIdleDelay()
-	local fidget = self:GetFidgetDelay()
-	if idle > 0 and CurTime() > idle then
-		self:SetIdleDelay(0)
-		self:SetFidgetDelay(CurTime() +self:SequenceDuration() +math.random(10,12))
-		self:SendWeaponAnim(ACT_VM_IDLE)
-		self:SetState(SSAM_STATE_IDLE)
-	end
-	
-	if fidget > 0 and CurTime() > fidget then
-		self:SetFidgetDelay(0)
-		if self:LookupSequence("idle2") == -1 then return end
-		self:SendWeaponAnim(ACT_VM_FIDGET)
-		self:SetIdleDelay(CurTime() +self:SequenceDuration())
+	if !self.EnableIdle then
+		local idle = self:GetIdleDelay()
+		local fidget = self:GetFidgetDelay()
+		if idle > 0 and CurTime() > idle then
+			self:SetIdleDelay(0)
+			self:SetFidgetDelay(CurTime() + self:SequenceDuration() + math.random(10,12))
+			self:SendWeaponAnim(ACT_VM_IDLE)
+			self:SetState(SSAM_STATE_IDLE)
+		end		
+		if fidget > 0 and CurTime() > fidget then
+			self:SetFidgetDelay(0)
+			if self:LookupSequence("idle2") != -1 then
+				self:SendWeaponAnim(ACT_VM_FIDGET)
+				self:SetIdleDelay(CurTime() + self:SequenceDuration())
+			end
+		end
 	end
 	
 	if !game.SinglePlayer() and self:GetHolster() then
@@ -305,8 +302,8 @@ end
 
 function SWEP:TakeAmmo(num)
 	num = num or 1
-	if !cvars.Bool("ss_unlimitedammo") then
-		if !self.Owner:IsNPC() then self:TakePrimaryAmmo(num) end
+	if !cvar_unlimitedammo:GetBool() and !self.Owner:IsNPC() then
+		self:TakePrimaryAmmo(num)
 	end	
 end
 
@@ -316,60 +313,9 @@ function SWEP:IdleStuff()
 	self:SetIdleDelay(CurTime() +self:SequenceDuration())
 end
 
-local sam = {
-	["models/pechenko_121/samclassic.mdl"] = true,
-	["models/pechenko_121/beheadedben.mdl"] = true,
-	["models/pechenko_121/redrick.mdl"] = true,
-	["models/pechenko_121/steelsteve.mdl"] = true
-}
-
-hook.Add("SetupMove", "samjumpsound", function(ply, move)
-	if bit.band(move:GetButtons(), IN_JUMP) ~= 0 and bit.band(move:GetOldButtons(), IN_JUMP) == 0 and ply:OnGround() and ply:WaterLevel() < 2 and ply:Alive() and !ply:InVehicle() then
-		if CLIENT then return end
-		if sam[ply:GetModel()] then
-			if !ply.JumpSoundDelay then
-				ply.JumpSoundDelay = CurTime()
-			end
-
-			if ply.JumpSoundDelay and ply.JumpSoundDelay <= CurTime() then
-				ply:EmitSound("player/serioussam/Jump.wav", 80, 100)
-				ply.JumpSoundDelay = CurTime() + .2
-			end
-		end
-	end
-end)
-
-hook.Add("PlayerHurt", "samplayerhurt", function(ply, at, h, dmg)	
-	if sam[ply:GetModel()] and ply:Health() > 0 then
-		if !ply.SoundDelay then
-			ply.SoundDelay = CurTime()
-		end
-
-		if ply.SoundDelay and ply.SoundDelay <= CurTime() then
-			local pitch = math.random(92,112)
-			if ply:WaterLevel() == 3 then
-				ply:EmitSound("player/serioussam/WoundWater.wav", 80, pitch)
-			elseif dmg > 30 then
-				ply:EmitSound("player/serioussam/WoundStrong.wav", 80, pitch)
-			elseif dmg >= 15 then
-				ply:EmitSound("player/serioussam/WoundMedium.wav", 80, pitch)
-			elseif dmg < 15 then
-				ply:EmitSound("player/serioussam/WoundWeak.wav", 80, pitch)
-			end
-			ply.SoundDelay = CurTime() + 0.45
-		end
-	end
-end)
-
-hook.Add("PlayerDeath", "samdeath", function(ply)
-	if sam[ply:GetModel()] then
-		if ply:WaterLevel() == 3 then
-			ply:EmitSound("player/serioussam/DeathWater.wav", 70, 100)
-		elseif ply:WaterLevel() < 3 then
-			ply:EmitSound("player/serioussam/Death.wav", 80, 100)
-		end
-	end
-end)
+function SWEP:IsCreature(ent)
+	return ent:IsNPC() or ent:IsPlayer() or ent:IsNextBot()
+end
 
 if SERVER then return end
 
@@ -443,6 +389,7 @@ function SWEP:DrawHUD()
 	self:Crosshair()
 end
 
+local cvar_crosshair = CreateClientConVar("ss_crosshair", 1)
 function SWEP:Crosshair()
 	local x, y = ScrW() / 2, ScrH() / 2
 	local tr = self.Owner:GetEyeTraceNoCursor()
@@ -455,11 +402,12 @@ function SWEP:Crosshair()
 	local dist = math.Round(-self.Owner:GetPos():Distance(self.Owner:GetEyeTraceNoCursor().HitPos) /12) +64
 	dist = math.Clamp(dist, 32, 128)
 
-	local getcvar = cvars.Number("ss_crosshair")
+	local getcvar = cvar_crosshair:GetInt()
 	if getcvar <= 0 or getcvar > 7 then return end
 	
 	local colr, colg, colb = 255, 255, 255
-	if !game.SinglePlayer() and tr.Hit and (tr.Entity:IsNPC() or tr.Entity:IsPlayer()) and tr.Entity:Health() > 0 then
+	-- NPC health won't update in singleplayer if ai_disabled is 1
+	if tr.Hit and self:IsCreature(tr.Entity) and tr.Entity:Health() > 0 then
 		local maxhealth, health = tr.Entity:GetMaxHealth(), tr.Entity:Health()
 		if health <= maxhealth / 4 then
 			colr, colg, colb = 255, 0, 0
