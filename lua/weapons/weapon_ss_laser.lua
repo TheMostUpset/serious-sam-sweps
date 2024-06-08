@@ -8,6 +8,7 @@ if CLIENT then
 	SWEP.ViewModelFOV		= 70
 	SWEP.WepIcon			= "icons/serioussam/Laser"
 	killicon.Add("weapon_ss_laser", SWEP.WepIcon, Color(255, 255, 255, 255))
+	killicon.Add("ss_laser", SWEP.WepIcon, Color(255, 255, 255, 255))
 	
 end
 
@@ -44,19 +45,23 @@ function SWEP:PrimaryAttack()
 		pos = pos +ang:Right() *10 -ang:Up() *9
 		self:SendWeaponAnim(ACT_VM_PRIMARYATTACK_4)
 	end
+	
+	-- local tr = util.QuickTrace(pos, ang:Forward() * 64, self.Owner)
+	local tr = util.TraceLine({
+		start = self.Owner:GetShootPos(), 
+		endpos = pos + ang:Forward() * 55, 
+		filter = self.Owner
+	})
 		
 	if SERVER then
 		local ent = ents.Create("ss_laser")
 		ent:SetAngles(ang)
-		ent:SetPos(pos +ang:Forward() *2)
+		ent:SetPos(tr.HitPos)
 		ent:SetOwner(self.Owner)
+		ent:SetInflictor(self)
 		ent:SetDamage(self.Primary.Damage)
+		ent:SetVelocity(ang:Up() *2 +ang:Forward() *self.ProjectileSpeed +ang:Right() *-2)
 		ent:Spawn()
-		ent:Activate()
-		local phys = ent:GetPhysicsObject()
-		if IsValid(phys) then
-			phys:SetVelocity(ang:Up() *2 +ang:Forward() *4096 +ang:Right() *-2)
-		end
 	end
 	self:HolsterDelay()
 	self:IdleStuff()
@@ -99,6 +104,7 @@ SWEP.Primary.Damage			= 20
 SWEP.Primary.Delay			= .1
 SWEP.Primary.DefaultClip	= 50
 SWEP.Primary.Ammo			= "ar2"
+SWEP.ProjectileSpeed		= 3500
 
 SWEP.LaserPos				= true
 
