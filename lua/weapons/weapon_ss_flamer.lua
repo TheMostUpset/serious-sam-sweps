@@ -17,11 +17,22 @@ end
 
 function SWEP:PrimaryAttack()
 	if !self:CanPrimaryAttack() or self.Owner:WaterLevel() >= 3 then return end
-	if self:GetAttackDelay() <= 0 then
-		self:SetAttackDelay(CurTime() + .25)
+	if self.Owner:IsNPC() then
+		self:DoFire(3, 1)
+		local pitch = math.random(28, 35)
+		self:EmitSound(self.Primary.Sound, 90, pitch)
+		timer.Create("SS_Flamer_NPC_StopSound", .25, 1, function()
+			if IsValid(self) then
+				self:EmitSound(self.Sound, 90, pitch)
+			end
+		end)
+	else
+		if self:GetAttackDelay() <= 0 then
+			self:SetAttackDelay(CurTime() + .25)
+		end
+		self:SendWeaponAnim(ACT_VM_PRIMARYATTACK)
+		self:HolsterDelay(self:GetAttackDelay() +.2)
 	end
-	self:SendWeaponAnim(ACT_VM_PRIMARYATTACK)
-	self:HolsterDelay(self:GetAttackDelay() +.2)
 end
 
 function SWEP:SpecialThink()
@@ -42,67 +53,7 @@ function SWEP:SpecialThink()
 			self.fire:PlayEx(1, 30)
 		end
 		
-		if SERVER then self.Owner:LagCompensation(true) end
-		local tr = util.TraceLine({
-			start = self.Owner:GetShootPos(),
-			endpos = self.Owner:GetShootPos() + self.Owner:GetAimVector() * self.HitDist,
-			filter = self.Owner
-		})
-
-		if !IsValid(tr.Entity) then
-			tr = util.TraceHull({
-			start = self.Owner:GetShootPos(),
-			endpos = self.Owner:GetShootPos() + self.Owner:GetAimVector() * self.HitDist,
-			filter = self.Owner,
-			mins = Vector(-16, -16, -10),
-			maxs = Vector(16, 16, 10)
-			})
-		end
-		
-		if SERVER then
-			if tr.Hit and (IsValid(tr.Entity) or tr.HitWorld) then
-				local hitTime = tr.StartPos:Distance(tr.HitPos)/768
-				timer.Simple(hitTime, function()
-					if !IsValid(self) or !IsValid(self.Owner) then return end
-					local dmginfo = DamageInfo()
-					local attacker = self.Owner
-					if (!IsValid(attacker)) then attacker = self end
-					dmginfo:SetAttacker(attacker)
-					dmginfo:SetInflictor(self)
-					dmginfo:SetDamageType(DMG_SLOWBURN)
-					dmginfo:SetDamage(self.Primary.Damage)
-					dmginfo:SetDamageForce(self.Owner:GetUp() *1000 +self.Owner:GetForward() *4000)
-					if IsValid(tr.Entity) then
-						tr.Entity:TakeDamageInfo(dmginfo)
-						tr.Entity:Ignite(7)
-					end
-					local ents = ents.FindInSphere(tr.HitPos, 32)
-					for k,v in pairs(ents) do
-						local trace = util.TraceHull({
-							start = tr.HitPos,
-							endpos = v:GetPos(),
-							filter = {self.Owner, tr.Entity}
-						})
-						if IsValid(trace.Entity) and trace.Entity == v and self:IsCreature(trace.Entity) then
-							trace.Entity:Ignite(7)
-							trace.Entity:TakeDamageInfo(dmginfo)
-						end
-					end
-				end)
-			end
-			self.Owner:LagCompensation(false)
-		end
-		
-		if IsFirstTimePredicted() then
-			local fx = EffectData()
-			fx:SetEntity(self)
-			fx:SetOrigin(self.Owner:GetShootPos())
-			fx:SetNormal(self.Owner:GetAimVector())
-			fx:SetStart(tr.HitPos)
-			fx:SetAngles(Angle(math.Rand(0,360), math.Rand(0,360), math.Rand(0,360)))
-			fx:SetAttachment(1)
-			util.Effect("ss_flamethrower", fx)
-		end
+		self:DoFire()
 
 		self:SetAttackDelay(CurTime() + self.Primary.Delay)
 	end
@@ -114,9 +65,94 @@ function SWEP:SpecialThink()
 	end
 end
 
+function SWEP:DoFire(damage, igniteTime)
+	damage = damage or self.Primary.Damage
+	igniteTime = igniteTime or 7
+	
+	if SERVER and self.Owner:IsPlayer() then self.Owner:LagCompensation(true) end
+	
+	local tr = util.TraceLine({
+		start = self.Owner:GetShootPos(),
+		endpos = self.Owner:GetShootPos() + self.Owner:GetAimVector() * self.HitDist,
+		filter = self.Owner
+	})
+
+	if !IsValid(tr.Entity) then
+		tr = util.TraceHull({
+			start = self.Owner:GetShootPos(),
+			endpos = self.Owner:GetShootPos() + self.Owner:GetAimVector() * self.HitDist,
+			filter = self.Owner,
+			mins = Vector(-16, -16, -10),
+			maxs = Vector(16, 16, 10)
+		})
+	end
+	
+	if SERVER then
+		if tr.Hit and (IsValid(tr.Entity) or tr.HitWorld) then
+			local hitTime = tr.StartPos:Distance(tr.HitPos)/768
+			timer.Simple(hitTime, function()
+				if !IsValid(self) or !IsValid(self.Owner) then return end
+				local dmginfo = DamageInfo()
+				local attacker = self.Owner
+				if !IsValid(attacker) then attacker = self end
+				dmginfo:SetAttacker(attacker)
+				dmginfo:SetInflictor(self)
+				dmginfo:SetDamageType(DMG_SLOWBURN)
+				dmginfo:SetDamage(damage)
+				dmginfo:SetDamageForce(self.Owner:GetUp() *1000 +self.Owner:GetForward() *4000)
+				if IsValid(tr.Entity) then
+					tr.Entity:TakeDamageInfo(dmginfo)
+					tr.Entity:Ignite(igniteTime)
+				end
+				local ents = ents.FindInSphere(tr.HitPos, 32)
+				for k,v in pairs(ents) do
+					local trace = util.TraceHull({
+						start = tr.HitPos,
+						endpos = v:GetPos(),
+						filter = {self.Owner, tr.Entity}
+					})
+					if IsValid(trace.Entity) and trace.Entity == v and self:IsCreature(trace.Entity) then
+						trace.Entity:Ignite(igniteTime)
+						trace.Entity:TakeDamageInfo(dmginfo)
+					end
+				end
+			end)
+		end
+		if self.Owner:IsPlayer() then self.Owner:LagCompensation(false) end
+	end
+	
+	if IsFirstTimePredicted() then
+		local fx = EffectData()
+		fx:SetEntity(self)
+		fx:SetOrigin(self.Owner:GetShootPos())
+		fx:SetNormal(self.Owner:GetAimVector())
+		fx:SetStart(tr.HitPos)
+		fx:SetAngles(Angle(math.Rand(0,360), math.Rand(0,360), math.Rand(0,360)))
+		fx:SetAttachment(1)
+		util.Effect("ss_flamethrower", fx)
+	end
+end
+
 function SWEP:OnRemove()
 	self:SetAttackDelay(0)
 	if self.fire then self.fire:Stop() end
+	self:StopSound(self.Primary.Sound)
+end
+
+if SERVER then
+
+	function SWEP:GetNPCBulletSpread()
+		return 10
+	end
+
+	function SWEP:GetNPCBurstSettings()
+		return 20, 40, .1
+	end
+
+	function SWEP:GetNPCRestTimes()
+		return 2, 5
+	end
+	
 end
 
 SWEP.HoldType			= "shotgun"
@@ -128,6 +164,7 @@ SWEP.ViewModel			= "models/weapons/serioussam/v_flamer.mdl"
 SWEP.WorldModel			= "models/weapons/serioussam/w_flamer.mdl"
 
 SWEP.Primary.Sound			= Sound("weapons/serioussam/flamer/Fire.wav")
+SWEP.Primary.Damage			= 10
 SWEP.Primary.Delay			= .03
 SWEP.Primary.DefaultClip	= 100
 SWEP.Primary.Ammo			= "napalm"

@@ -55,6 +55,12 @@ function SWEP:CanPrimaryAttack()
 	return true
 end
 
+if SERVER then	
+	function SWEP:GetNPCBulletSpread()
+		return 5
+	end
+end
+
 SWEP.HoldType			= "pistol"
 SWEP.Base				= "weapon_ss_base"
 SWEP.Category			= "Serious Sam"

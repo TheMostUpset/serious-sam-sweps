@@ -72,6 +72,20 @@ function SWEP:OnRemove()
 	self:SetBarrel(0)
 end
 
+if SERVER then	
+	function SWEP:GetNPCBulletSpread()
+		return 12
+	end
+
+	function SWEP:GetNPCBurstSettings()
+		return 1, 4, self.Primary.Delay * 2
+	end
+
+	function SWEP:GetNPCRestTimes()
+		return .3, .8
+	end
+end
+
 SWEP.HoldType			= "crossbow"
 SWEP.Base				= "weapon_ss_base"
 SWEP.Category			= "Serious Sam"

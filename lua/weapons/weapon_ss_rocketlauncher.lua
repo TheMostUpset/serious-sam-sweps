@@ -35,6 +35,22 @@ function SWEP:PrimaryAttack()
 	self:HolsterDelay()
 end
 
+if SERVER then
+
+	function SWEP:GetNPCBulletSpread()
+		return 10
+	end
+
+	function SWEP:GetNPCBurstSettings()
+		return 1, 1, self.Primary.Delay * 2
+	end
+
+	function SWEP:GetNPCRestTimes()
+		return self.Primary.Delay, self.Primary.Delay * 3
+	end
+	
+end
+
 SWEP.HoldType			= "crossbow"
 SWEP.Base				= "weapon_ss_base"
 SWEP.Category			= "Serious Sam"

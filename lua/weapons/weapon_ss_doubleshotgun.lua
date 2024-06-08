@@ -23,6 +23,22 @@ function SWEP:WeaponSound(snd)
 	self.ReloadSoundDelay = CurTime() +.3
 end
 
+if SERVER then
+
+	function SWEP:GetNPCBulletSpread()
+		return 12
+	end
+
+	function SWEP:GetNPCBurstSettings()
+		return 1, 1, self.Primary.Delay
+	end
+
+	function SWEP:GetNPCRestTimes()
+		return self.Primary.Delay, self.Primary.Delay * 3
+	end
+	
+end
+
 SWEP.HoldType			= "shotgun"
 SWEP.Base				= "weapon_ss_base"
 SWEP.Category			= "Serious Sam"

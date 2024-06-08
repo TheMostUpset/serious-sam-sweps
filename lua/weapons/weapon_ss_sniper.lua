@@ -154,6 +154,22 @@ function SWEP:AdjustMouseSensitivity()
 	end
 end
 
+if SERVER then
+
+	function SWEP:GetNPCBulletSpread()
+		return 2
+	end
+
+	function SWEP:GetNPCBurstSettings()
+		return 1, 1, self.Primary.Delay * 1.5
+	end
+
+	function SWEP:GetNPCRestTimes()
+		return self.Primary.Delay * 3, self.Primary.Delay * 6
+	end
+	
+end
+
 SWEP.HoldType			= "shotgun"
 SWEP.Base				= "weapon_ss_base"
 SWEP.Category			= "Serious Sam"

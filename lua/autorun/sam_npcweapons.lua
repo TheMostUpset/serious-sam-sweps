@@ -1,3 +1,8 @@
 list.Add( "NPCUsableWeapons", { class = "weapon_ss_colt", title = "SSam Colt" } )
 list.Add( "NPCUsableWeapons", { class = "weapon_ss_tommygun", title = "SSam Thompson" } )
 list.Add( "NPCUsableWeapons", { class = "weapon_ss_laser", title = "SSam Lasergun" } )
+list.Add( "NPCUsableWeapons", { class = "weapon_ss_singleshotgun", title = "SSam Shotgun" } )
+list.Add( "NPCUsableWeapons", { class = "weapon_ss_doubleshotgun", title = "SSam Double Shotgun" } )
+list.Add( "NPCUsableWeapons", { class = "weapon_ss_rocketlauncher", title = "SSam Rocket Launcher" } )
+list.Add( "NPCUsableWeapons", { class = "weapon_ss_sniper", title = "SSam Sniper Rifle" } )
+list.Add( "NPCUsableWeapons", { class = "weapon_ss_flamer", title = "SSam Flamethrower" } )

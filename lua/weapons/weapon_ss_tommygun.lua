@@ -42,6 +42,20 @@ function SWEP:OnRemove()
 	self.SmokeAmount = 0
 end
 
+if SERVER then	
+	function SWEP:GetNPCBulletSpread()
+		return 6
+	end
+
+	function SWEP:GetNPCBurstSettings()
+		return 1, 5, .1
+	end
+
+	function SWEP:GetNPCRestTimes()
+		return .2, .4
+	end
+end
+
 SWEP.HoldType			= "smg"
 SWEP.Base				= "weapon_ss_base"
 SWEP.Category			= "Serious Sam"

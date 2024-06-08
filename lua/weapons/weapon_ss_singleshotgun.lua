@@ -9,6 +9,20 @@ if CLIENT then
 	SWEP.WepIcon			= "icons/serioussam/SingleShotgun"
 	killicon.Add("weapon_ss_singleshotgun", SWEP.WepIcon, Color(255, 255, 255, 255))
 	
+else
+	
+	function SWEP:GetNPCBulletSpread()
+		return 10
+	end
+
+	function SWEP:GetNPCBurstSettings()
+		return 1, 1, self.Primary.Delay
+	end
+
+	function SWEP:GetNPCRestTimes()
+		return self.Primary.Delay, self.Primary.Delay * 2
+	end
+	
 end
 
 SWEP.HoldType			= "shotgun"
