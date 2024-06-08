@@ -308,10 +308,11 @@ function SWEP:TakeAmmo(num)
 	end	
 end
 
-function SWEP:IdleStuff()
+function SWEP:IdleStuff(div)
+	div = div or 1
 	if self.EnableIdle then return end
 	self:SetFidgetDelay(0)
-	self:SetIdleDelay(CurTime() +self:SequenceDuration())
+	self:SetIdleDelay(CurTime() + self:SequenceDuration() / div)
 end
 
 function SWEP:IsCreature(ent)
