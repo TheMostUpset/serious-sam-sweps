@@ -58,6 +58,6 @@ function ENT:PhysicsCollide(data, physobj)
     local endpos = data.HitPos - data.HitNormal
 	util.Decal("fadingscorch", start, endpos)	
 	self:ExplosionEffects(endpos, data.HitNormal:Angle())
-	data.HitEntity:TakeDamage(self.Damage, self.Entity:GetOwner())
+	data.HitEntity:TakeDamage(self.Damage, self:GetOwner())
 	self:Remove()
 end
