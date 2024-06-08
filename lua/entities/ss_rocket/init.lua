@@ -24,7 +24,6 @@ function ENT:Initialize()
 	glow:Spawn()
 	glow:SetParent(self)
 	glow:SetPos(self:GetPos())
-	self:SetRenderMode(RENDERMODE_TRANSALPHA)
 	
 	self:EmitSound(self.FlySound)
 	ParticleEffectAttach("rocket_smoke_trail", PATTACH_ABSORIGIN_FOLLOW, self, 0)
