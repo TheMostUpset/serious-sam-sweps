@@ -52,6 +52,7 @@ SWEP.EnableSmoke			= false
 SWEP.DeployDelay			= 1.6
 
 SWEP.EnableIdle				= false -- lua-based idle anim imitation (bad variable name actually)
+SWEP.UseHolsterAnim			= true
 
 SWEP.LaserPos				= false
 
@@ -144,7 +145,7 @@ function SWEP:Holster(wep)
 	
 	local disableHolster = self.DisableHolster and self.DisableHolster > CurTime()
 
-	if !cvars.Bool("ss_enableholsterdelay") then
+	if !self.UseHolsterAnim or !cvars.Bool("ss_enableholsterdelay") then
 		if disableHolster then
 			return false
 		else
