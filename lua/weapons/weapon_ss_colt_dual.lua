@@ -22,7 +22,7 @@ function SWEP:Initialize()
 end
 
 function SWEP:Equip(ply)
-	ply:Give("weapon_ss_colt")
+	ply:Give(self.Base)
 end
 
 function SWEP:Deploy()
