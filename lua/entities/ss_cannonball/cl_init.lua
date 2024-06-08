@@ -2,7 +2,6 @@ include('shared.lua')
 
 function ENT:Initialize()
 	self.emitter = ParticleEmitter(self:GetPos())
-	self.emitterValid = true
 end
 
 function ENT:Draw()
@@ -44,8 +43,7 @@ function ENT:Draw()
 end
 
 function ENT:OnRemove()
-	if self.emitterValid then
+	if self.emitter and self.emitter:IsValid() then
 		self.emitter:Finish()
-		self.emitterValid = nil
 	end
 end
