@@ -3,7 +3,7 @@ EFFECT.mat = Material("sprites/serioussam/ray")
 function EFFECT:Init(data)
 	self.Position = data:GetOrigin()
 	self.WeaponEnt = data:GetEntity()
-	self.WeaponOwner = self.WeaponEnt:GetOwner()
+	self.WeaponOwner = IsValid(self.WeaponEnt) and self.WeaponEnt:GetOwner() or NULL
 	self.Attachment = data:GetAttachment()
 	
 	self.DieTime = .4
@@ -25,7 +25,7 @@ end
 
 function EFFECT:Render()
 	local pos = self:GetTracerShootPos(self.Position, self.WeaponEnt, self.Attachment)
-	if !self.WeaponEnt or !IsValid(self.WeaponEnt) or !pos then return end
+	if !IsValid(self.WeaponEnt) or !IsValid(self.WeaponOwner) or !pos then return end
 	local Normal = self.WeaponOwner:GetAimVector()
 	local tr = util.TraceLine({
 		start = pos,
