@@ -104,7 +104,7 @@ SWEP.Primary.Damage			= 20
 SWEP.Primary.Delay			= .1
 SWEP.Primary.DefaultClip	= 50
 SWEP.Primary.Ammo			= "ar2"
-SWEP.ProjectileSpeed		= 3500
+SWEP.ProjectileSpeed		= 3500 -- max source engine speed?
 
 SWEP.LaserPos				= true
 
