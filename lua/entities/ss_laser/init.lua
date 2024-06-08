@@ -1,10 +1,11 @@
-
 AddCSLuaFile("cl_init.lua")
 AddCSLuaFile("shared.lua")
 include("shared.lua")
 
+ENT.Model = Model("models/projectiles/serioussam/laserproj.mdl")
+
 function ENT:Initialize()
-	self:SetModel("models/projectiles/serioussam/laserproj.mdl")
+	self:SetModel(self.Model)
 	self:SetCollisionGroup(COLLISION_GROUP_PROJECTILE)
 	local mins, maxs = Vector(-8, -1, -1), Vector(8, 1, 1)
 	self:PhysicsInitBox(mins, maxs)
