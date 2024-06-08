@@ -27,9 +27,9 @@ function EFFECT:Think()
 end
 
 function EFFECT:Render()
-	if self.HitPos and self.Pos:Distance(self.HitPos) <= 32 then
+	if self.HitPos and self.Pos:DistToSqr(self.HitPos) <= 1000 then
 		local frametime = FrameTime()
-		self.Pos = self.HitPos + self.Normal*frametime*1200 +self.Normal:Angle():Up()*frametime*self.Size/1.85
+		self.Pos = self.HitPos + self.Normal + self.Normal:Angle():Up() * frametime * self.Size / 1.85
 	end
 
 	local col = math.Clamp(self.Alpha, 0, 80)
