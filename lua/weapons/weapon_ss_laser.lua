@@ -12,6 +12,8 @@ if CLIENT then
 	
 end
 
+local cvar_tfesound = CreateConVar("ss_laser_tfe", 0, {FCVAR_ARCHIVE, FCVAR_REPLICATED}, "The First Encounter sound for Lasergun", 0, 1)
+
 function SWEP:SpecialDataTables()
 	self:NetworkVar("Int", 1, "Barrel")
 end
@@ -19,9 +21,14 @@ end
 function SWEP:PrimaryAttack()
 	if !self:CanPrimaryAttack() then return end
 	
+	local firesnd = self.Primary.Sound
+	if cvar_tfesound:GetBool() then
+		firesnd = self.Primary.Sound1
+	end
+	
 	self:SetNextPrimaryFire(CurTime() + self.Primary.Delay)
 	self.Owner:SetAnimation(PLAYER_ATTACK1)
-	self:WeaponSound(self.Primary.Sound)
+	self:WeaponSound(firesnd)
 	self:TakeAmmo(1)	
 
 	local pos = self.Owner:GetShootPos()
@@ -100,6 +107,7 @@ SWEP.ViewModel			= "models/weapons/serioussam/v_laser.mdl"
 SWEP.WorldModel			= "models/weapons/serioussam/w_laser.mdl"
 
 SWEP.Primary.Sound			= Sound("weapons/serioussam/laser/fire.wav")
+SWEP.Primary.Sound1			= Sound("weapons/serioussam/laser/fire_tfe.wav")
 SWEP.Primary.Damage			= 20
 SWEP.Primary.Delay			= .1
 SWEP.Primary.DefaultClip	= 50
