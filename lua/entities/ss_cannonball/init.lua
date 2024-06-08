@@ -24,6 +24,21 @@ function ENT:PhysicsCollide(data, phys)
 	if data.DeltaTime > 0.1 then self:EmitSound("weapons/serioussam/cannon/Bounce.wav") end
 	
 	if IsValid(data.HitEntity) and !(data.HitEntity:IsNPC() or data.HitEntity:IsPlayer()) then
+		if data.HitEntity:GetClass() == "phys_bone_follower" then
+			local ownerEnt = data.HitEntity:GetOwner()
+			if IsValid(ownerEnt) then
+				local class = ownerEnt:GetClass()
+				if class == "npc_helicopter" then
+					if data.Speed >= 1570 then
+						self:Explode()
+					else
+						ownerEnt:SetVelocity(data.OurOldVelocity / 3) -- push it
+					end
+				elseif class == "npc_strider" then
+					self:Explode()
+				end
+			end
+		end
 		local entphys = data.HitEntity:GetPhysicsObject()
 		if IsValid(entphys) then
 			entphys:ApplyForceOffset((phys:GetVelocity() * entphys:GetMass())/16, data.HitPos)
@@ -67,7 +82,13 @@ function ENT:Explode(exppos)
 
 	self:ExplosionEffects(pos, pos:Angle())	
 	self:EmitSound("weapons/serioussam/Explosion02.wav", 100, 100)
-	util.BlastDamage(self, self:GetOwner(), pos, 350, self.Damage)
+	local owner = IsValid(self.Owner) and self.Owner or self
+	local dmg = DamageInfo()
+	dmg:SetInflictor(self)
+	dmg:SetAttacker(owner)
+	dmg:SetDamage(self.Damage)
+	dmg:SetDamageType(bit.bor(DMG_BLAST, DMG_AIRBOAT))
+	util.BlastDamageInfo(dmg, pos, 350)
 	self:Remove()
 end
 

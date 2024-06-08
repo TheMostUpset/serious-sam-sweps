@@ -68,7 +68,7 @@ function ENT:DoDamage(ent, tr)
 	dmginfo:SetInflictor(inflictor)
 	dmginfo:SetDamage(self.Damage)
 	dmginfo:SetDamagePosition(tr.HitPos)
-	dmginfo:SetDamageType(DMG_ENERGYBEAM)
+	dmginfo:SetDamageType(bit.bor(DMG_ENERGYBEAM, DMG_AIRBOAT))
 	dmginfo:SetDamageForce(self:GetVelocity() * 3)
 	ent:DispatchTraceAttack(dmginfo, tr)
 end

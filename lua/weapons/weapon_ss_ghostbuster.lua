@@ -73,11 +73,11 @@ function SWEP:PrimaryAttack()
 			if !IsValid(attacker) then attacker = self end
 			dmginfo:SetAttacker(attacker)
 			dmginfo:SetInflictor(self)
-			dmginfo:SetDamageType(DMG_SHOCK)
+			dmginfo:SetDamageType(bit.bor(DMG_SHOCK, DMG_AIRBOAT))
 			dmginfo:SetDamage(self.Primary.Damage)
 			dmginfo:SetDamageForce(self.Owner:GetUp() *2000 +self.Owner:GetForward() *20000)
 			dmginfo:SetDamagePosition(tr.HitPos)
-			tr.Entity:TakeDamageInfo(dmginfo)			
+			tr.Entity:TakeDamageInfo(dmginfo)
 		end
 		self.Owner:LagCompensation(false)
 	end
