@@ -80,7 +80,7 @@ function SWEP:Melee()
 			delay = .06
 		end
 		self:SendWeaponAnim(ACT_VM_PRIMARYATTACK)
-		self:SetAnimDelay(CurTime() +delay)
+		self:SetAnimDelay(CurTime() + delay)
 	end
 	
 	if SERVER then self.Owner:LagCompensation(true) end
@@ -92,44 +92,56 @@ function SWEP:Melee()
 
 	if !IsValid(tr.Entity) then
 		tr = util.TraceHull({
-		start = self.Owner:GetShootPos(),
-		endpos = self.Owner:GetShootPos() + self.Owner:GetAimVector() * self.HitDist,
-		filter = self.Owner,
-		mins = Vector(-2, -2, -1),
-		maxs = Vector(2, 2, 1)
+			start = self.Owner:GetShootPos(),
+			endpos = self.Owner:GetShootPos() + self.Owner:GetAimVector() * self.HitDist,
+			filter = self.Owner,
+			mins = Vector(-2, -2, -1),
+			maxs = Vector(2, 2, 1)
 		})
 	end
 	
 	if tr.Hit then
-		self:ImpactEffect(tr)
-		if game.SinglePlayer() and SERVER or CLIENT and IsFirstTimePredicted() then util.ScreenShake(tr.HitPos, .5, 5, .15, 80) end
-		local hitsnd = self.HitSound1
-		if tr.HitWorld then
-			if game.SinglePlayer() and SERVER or CLIENT and IsFirstTimePredicted() then
-				local effectdata = EffectData()
-				effectdata:SetOrigin(tr.HitPos)
-				effectdata:SetMagnitude(1)
-				effectdata:SetScale(1)
-				effectdata:SetRadius(1)
-				util.Effect("Sparks", effectdata, true, true)
-			end
-		elseif self:IsCreature(tr.Entity) then
-			hitsnd = self.HitSound2
-		end
-		if SERVER then
-			sound.Play(hitsnd, tr.HitPos, 80, 100)
-			local dmginfo = DamageInfo()
-			local attacker = self.Owner
-			if (!IsValid(attacker)) then attacker = self end
-			dmginfo:SetAttacker(attacker)
-			dmginfo:SetInflictor(self)
-			dmginfo:SetDamage(self.Primary.Damage)
-			dmginfo:SetDamageForce(self.Owner:GetUp() *1000 +self.Owner:GetForward() *8000 +self.Owner:GetRight() *-1000)
-			tr.Entity:TakeDamageInfo(dmginfo)
-		end
+		self:OnHit(tr)
 	end
 
 	if SERVER then self.Owner:LagCompensation(false) end
+end
+
+function SWEP:OnHit(tr)
+	self:ImpactEffect(tr)
+	if game.SinglePlayer() and SERVER or CLIENT and IsFirstTimePredicted() then util.ScreenShake(tr.HitPos, .5, 5, .15, 80) end
+	local hitsnd = self.HitSound1
+	if tr.HitWorld then
+		self:EmitSparks(tr)
+	elseif self:IsCreature(tr.Entity) then
+		hitsnd = self.HitSound2
+	end
+	if SERVER then
+		sound.Play(hitsnd, tr.HitPos, 80, 100)
+	end
+	self:DoDamage(tr)
+end
+
+function SWEP:DoDamage(tr)
+	local dmginfo = DamageInfo()
+	local attacker = self.Owner
+	if !IsValid(attacker) then attacker = self end
+	dmginfo:SetAttacker(attacker)
+	dmginfo:SetInflictor(self)
+	dmginfo:SetDamage(self.Primary.Damage)
+	dmginfo:SetDamageForce(self.Owner:GetUp() *1000 +self.Owner:GetForward() *8000 +self.Owner:GetRight() *-1000)
+	tr.Entity:DispatchTraceAttack(dmginfo, tr)
+end
+
+function SWEP:EmitSparks(tr)
+	if game.SinglePlayer() and SERVER or CLIENT and IsFirstTimePredicted() then
+		local effectdata = EffectData()
+		effectdata:SetOrigin(tr.HitPos)
+		effectdata:SetMagnitude(1)
+		effectdata:SetScale(1)
+		effectdata:SetRadius(1)
+		util.Effect("Sparks", effectdata, true, true)
+	end
 end
 
 function SWEP:ImpactEffect(tr)

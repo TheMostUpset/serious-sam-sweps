@@ -22,38 +22,45 @@ function SWEP:PrimaryAttack()
 end
 
 function SWEP:Melee()
-	local HitDist = 65
 	if SERVER then self.Owner:LagCompensation(true) end
+	
 	local tr = util.TraceLine({
 		start = self.Owner:GetShootPos(),
-		endpos = self.Owner:GetShootPos() + self.Owner:GetAimVector() * HitDist,
+		endpos = self.Owner:GetShootPos() + self.Owner:GetAimVector() * self.HitDist,
 		filter = self.Owner
 	})
 
 	if !IsValid(tr.Entity) then
 		tr = util.TraceHull({
-		start = self.Owner:GetShootPos(),
-		endpos = self.Owner:GetShootPos() + self.Owner:GetAimVector() * HitDist,
-		filter = self.Owner,
-		mins = Vector(-3, -3, -1),
-		maxs = Vector(3, 3, 1)
+			start = self.Owner:GetShootPos(),
+			endpos = self.Owner:GetShootPos() + self.Owner:GetAimVector() * self.HitDist,
+			filter = self.Owner,
+			mins = Vector(-3, -3, -1),
+			maxs = Vector(3, 3, 1)
 		})
 	end
 	
 	if tr.Hit then
-		self:ImpactEffect(tr)
-		if CLIENT then return end
-		local dmginfo = DamageInfo()
-		local attacker = self.Owner
-		if (!IsValid(attacker)) then attacker = self end
-		dmginfo:SetAttacker(attacker)
-		dmginfo:SetInflictor(self)
-		dmginfo:SetDamage(self.Primary.Damage)
-		dmginfo:SetDamageForce(self.Owner:GetUp() *3000 +self.Owner:GetForward() *12000 +self.Owner:GetRight() *-1500)
-		tr.Entity:TakeDamageInfo(dmginfo)
+		self:OnHit(tr)
 	end
 
 	if SERVER then self.Owner:LagCompensation(false) end
+end
+
+function SWEP:OnHit(tr)
+	self:ImpactEffect(tr)
+	self:DoDamage(tr)
+end
+
+function SWEP:DoDamage(tr)
+	local dmginfo = DamageInfo()
+	local attacker = self.Owner
+	if !IsValid(attacker) then attacker = self end
+	dmginfo:SetAttacker(attacker)
+	dmginfo:SetInflictor(self)
+	dmginfo:SetDamage(self.Primary.Damage)
+	dmginfo:SetDamageForce(self.Owner:GetUp() *3000 +self.Owner:GetForward() *12000 +self.Owner:GetRight() *-1500)
+	tr.Entity:DispatchTraceAttack(dmginfo, tr)
 end
 
 function SWEP:ImpactEffect(tr)
@@ -83,5 +90,6 @@ SWEP.WorldModel			= "models/weapons/serioussam/w_knife.mdl"
 SWEP.Primary.Sound			= Sound("weapons/serioussam/knife/Back.wav")
 SWEP.Primary.Damage			= 120
 SWEP.Primary.Delay			= .83
+SWEP.HitDist				= 65
 
 SWEP.DeployDelay			= 1.9
