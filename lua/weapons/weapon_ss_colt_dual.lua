@@ -90,10 +90,14 @@ end
 
 function SWEP:GetTracerOrigin()
 	local ply = self:GetOwner()
-	local vm = ply:GetViewModel(1)
-	local att = vm:GetAttachment(1)
-	if self:GetAttackDelay() == 0 then
-		return att.Pos
+	if IsValid(ply) then
+		local vm = ply:GetViewModel(1)
+		if IsValid(vm) then
+			local att = vm:GetAttachment(1)
+			if self:GetAttackDelay() == 0 then
+				return att.Pos
+			end
+		end
 	end
 end
 
