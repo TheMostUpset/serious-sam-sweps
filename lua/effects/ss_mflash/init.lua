@@ -1,21 +1,21 @@
 EFFECT.mat = Material("sprites/serioussam/flare")
 
-function EFFECT:GetMuzzleFlashPos( Position, Ent, Attachment, modelindex )
+function EFFECT:GetMuzzleFlashPos(Position, Ent, Attachment, modelindex)
 
 	modelindex = modelindex or 0
 	
-	if ( !IsValid( Ent ) ) then return Position end
-	if ( !Ent:IsWeapon() ) then return Position end
+	if !IsValid(Ent) then return Position end
+	if !Ent:IsWeapon() then return Position end
 
 	-- Shoot from the viewmodel
-	if ( Ent:IsCarriedByLocalPlayer() && !LocalPlayer():ShouldDrawLocalPlayer() && !Ent:GetZoom() ) then
+	if Ent:IsCarriedByLocalPlayer() && !LocalPlayer():ShouldDrawLocalPlayer() && !Ent:GetZoom() then
 	
 		local ViewModel = LocalPlayer():GetViewModel(modelindex)
 		
-		if ( ViewModel:IsValid() ) then
+		if IsValid(ViewModel) then
 			
-			local att = ViewModel:GetAttachment( Attachment )
-			if ( att ) then
+			local att = ViewModel:GetAttachment(Attachment)
+			if att then
 				Position = att.Pos
 			end
 			
@@ -24,8 +24,11 @@ function EFFECT:GetMuzzleFlashPos( Position, Ent, Attachment, modelindex )
 	-- Shoot from the world model
 	else
 	
-		local att = Ent:GetAttachment( Attachment )
-		if ( att ) then
+		if modelindex == 1 and IsValid(Ent.LeftModel) then
+			Ent = Ent.LeftModel
+		end
+		local att = Ent:GetAttachment(Attachment)
+		if att then
 			Position = att.Pos
 		end
 	
