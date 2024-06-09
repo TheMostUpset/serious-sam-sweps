@@ -496,12 +496,14 @@ function SWEP:CalcViewModelView(vm, oldpos, oldang, pos, ang)
 		local bobup = sine * bobright / 2
 		local bobscale = self.SBobScale * math.Clamp(-vertOffset + 1, 0, 1)
 		
-		if game.SinglePlayer() or IsFirstTimePredicted() then
-			local FT = FrameTime()
-			if self.Owner:IsOnGround() then
-				t = Lerp(FT*16, t, 1)
-			else
-				t = math.max(Lerp(FT*7, t, 0.01), 0)
+		if !self.SBobInAir then
+			if game.SinglePlayer() or IsFirstTimePredicted() then
+				local FT = FrameTime()
+				if self.Owner:IsOnGround() then
+					t = Lerp(FT*16, t, 1)
+				else
+					t = math.max(Lerp(FT*7, t, 0.01), 0)
+				end
 			end
 		end
 
@@ -514,20 +516,18 @@ function SWEP:CalcViewModelView(vm, oldpos, oldang, pos, ang)
 	end
 	
 	if self.Owner:GetMoveType() == MOVETYPE_WALK then
-		if modelindex == 0 then -- don't call calculations more than once
+		if modelindex == 0 and (game.SinglePlayer() or IsFirstTimePredicted()) then -- don't call calculations more than once
 			local vertVel = ownerVelocity[3]
 			if vertVel < 0 then
 				vertOffset = math.max(vertVel * .005, -.3)
 				vertOffsetSinTime = 0
-				vertOffsetSinMul = math.min(vertVel * -.00075, .4)
+				vertOffsetSinMul = math.min(vertVel * -.00075, .4) -- TODO: change value based on correct jump height
 			elseif vertOffsetSinMul > .0001 then
-				if game.SinglePlayer() or IsFirstTimePredicted() then
-					local FT = FrameTime()
-					if FT > 0 then
-						vertOffsetSinTime = vertOffsetSinTime + FT * 10
-						vertOffsetSinMul = Lerp(FT*5, vertOffsetSinMul, 0)
-						vertOffset = Lerp(FT*16, vertOffset, 0) + math.sin(vertOffsetSinTime) * vertOffsetSinMul
-					end
+				local FT = FrameTime()
+				if FT > 0 then
+					vertOffsetSinTime = vertOffsetSinTime + FT * 10
+					vertOffsetSinMul = Lerp(FT*5, vertOffsetSinMul, 0)
+					vertOffset = Lerp(FT*16, vertOffset, 0) + math.sin(vertOffsetSinTime) * vertOffsetSinMul
 				end
 			end
 		end
