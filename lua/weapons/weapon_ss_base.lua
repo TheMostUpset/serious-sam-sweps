@@ -480,16 +480,20 @@ local cvar_bob = CreateClientConVar("ss_bob", 1)
 function SWEP:CalcViewModelView(vm, oldpos, oldang, pos, ang)
 	if !IsValid(vm) or !IsValid(self.Owner) then return end
 	
+	local modelindex = vm:ViewModelIndex()
+	
 	local reg = debug.getregistry()
 	local GetVelocity = reg.Entity.GetVelocity
+	local ownerVelocity = GetVelocity(self.Owner)
 	
 	if cvar_bob:GetBool() then
 		local Length = reg.Vector.Length2D
-		local vel = Length(GetVelocity(self.Owner))
-		local hz = math.Clamp(vel/256, 0, .4)
-		local move = math.sin(CurTime() * 10.5)
-		local moveright = move *hz
-		local moveup = move *moveright /2
+		local speed = Length(ownerVelocity)
+		speed = math.Clamp(speed/256, 0, .4)
+		local bobspeed = 10.5
+		local sine = math.sin(CurTime() * bobspeed)
+		local bobright = sine * speed
+		local bobup = sine * bobright / 2
 		local bobscale = self.SBobScale * math.Clamp(-vertOffset + 1, 0, 1)
 		
 		if game.SinglePlayer() or IsFirstTimePredicted() then
@@ -501,28 +505,29 @@ function SWEP:CalcViewModelView(vm, oldpos, oldang, pos, ang)
 			end
 		end
 
-		local modelindex = vm:ViewModelIndex()
 		if modelindex == 0 then
-			pos = pos + moveright *bobscale * ang:Right() *t
+			pos = pos + bobright * bobscale * ang:Right() *t
 		else
-			pos = pos - moveright *bobscale * ang:Right() *t
+			pos = pos - bobright * bobscale * ang:Right() *t
 		end	
-		pos = pos + moveup *bobscale * ang:Up() *t
+		pos = pos + bobup * bobscale * ang:Up() *t
 	end
 	
 	if self.Owner:GetMoveType() == MOVETYPE_WALK then
-		local vertVel = GetVelocity(self.Owner)[3]
-		if vertVel < 0 then
-			vertOffset = math.max(vertVel * .005, -.3)
-			vertOffsetSinTime = 0
-			vertOffsetSinMul = math.min(vertVel * -.00075, .4)
-		else
-			if game.SinglePlayer() or IsFirstTimePredicted() then
-				local FT = FrameTime()
-				if FT > 0 then
-					vertOffsetSinTime = vertOffsetSinTime + FT * 10
-					vertOffsetSinMul = Lerp(FT*5, vertOffsetSinMul, 0)
-					vertOffset = Lerp(FT*16, vertOffset, 0) + math.sin(vertOffsetSinTime) * vertOffsetSinMul
+		if modelindex == 0 then -- don't call calculations more than once
+			local vertVel = ownerVelocity[3]
+			if vertVel < 0 then
+				vertOffset = math.max(vertVel * .005, -.3)
+				vertOffsetSinTime = 0
+				vertOffsetSinMul = math.min(vertVel * -.00075, .4)
+			elseif vertOffsetSinMul > .0001 then
+				if game.SinglePlayer() or IsFirstTimePredicted() then
+					local FT = FrameTime()
+					if FT > 0 then
+						vertOffsetSinTime = vertOffsetSinTime + FT * 10
+						vertOffsetSinMul = Lerp(FT*5, vertOffsetSinMul, 0)
+						vertOffset = Lerp(FT*16, vertOffset, 0) + math.sin(vertOffsetSinTime) * vertOffsetSinMul
+					end
 				end
 			end
 		end
@@ -530,7 +535,8 @@ function SWEP:CalcViewModelView(vm, oldpos, oldang, pos, ang)
 	end
 	
 	if self.EnableIdle then
-		pos = pos + math.sin(CurTime() * 1.3) * ang:Up() /26
+		local breathSpeed, breathWeakness = 1.3, 26
+		pos = pos + math.sin(CurTime() * breathSpeed) * ang:Up() / breathWeakness
 	end
 	
 	if self.LaserPos then
@@ -548,7 +554,7 @@ function SWEP:CalcViewModelView(vm, oldpos, oldang, pos, ang)
 	end
 	
 	if self:GetZoom() then
-		pos = pos + ang:Up() * 20
+		pos = pos + ang:Up() * 20 -- hiding the viewmodel
 	end
 
 	return pos, ang

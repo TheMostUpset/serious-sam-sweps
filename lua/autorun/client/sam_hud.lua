@@ -84,7 +84,7 @@ local AmRockets = surface.GetTextureID("vgui/serioussam/hud/AmRockets")
 local AmShells = surface.GetTextureID("vgui/serioussam/hud/AmShells")
 local AmSniperBullets = surface.GetTextureID("vgui/serioussam/hud/AmSniperBullets")
 
-local weps = {
+SeriousHUD.WeaponIcons = {
 	["weapon_ss_knife"] = WKnife,
 	["weapon_ss_chainsaw"] = WChainsaw,
 	["weapon_ss_colt"] = WColt,
@@ -340,7 +340,7 @@ function SeriousHUD:Draw()
 
 			local class = awep:GetClass()
 			
-			local wicn = weps[class]
+			local wicn = SeriousHUD.WeaponIcons[class]
 			local hl2 = hl2weapons[class]
 			if wicn then		
 				surface.SetTexture(wicn)
