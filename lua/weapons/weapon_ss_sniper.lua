@@ -93,7 +93,7 @@ function SWEP:PrimaryAttack()
 	
 	local dmg = self.Primary.Damage
 	if self:GetZoom() then
-		dmg = 300
+		dmg = self.Primary.DamageZoom
 	end
 	
 	self:ShootBullet(dmg, self.Primary.NumShots, self.Primary.Cone)
@@ -181,6 +181,7 @@ SWEP.WorldModel			= "models/weapons/serioussam/w_sniper.mdl"
 SWEP.Primary.Sound			= Sound("weapons/serioussam/sniper/Fire.wav")
 SWEP.Primary.Special1		= Sound("weapons/serioussam/sniper/Zoom.wav")
 SWEP.Primary.Damage			= 70
+SWEP.Primary.DamageZoom		= 300
 SWEP.Primary.Cone			= .001
 SWEP.Primary.Delay			= 1.4
 SWEP.Primary.DefaultClip	= 15
