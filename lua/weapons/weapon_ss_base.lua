@@ -472,34 +472,62 @@ if SERVER then return end
 
 local t = 1
 local laseranim = 0
+local vertOffset = 0
+local vertOffsetSinMul = 0
+local vertOffsetSinTime = 0
+local cvar_bob = CreateClientConVar("ss_bob", 1)
 
 function SWEP:CalcViewModelView(vm, oldpos, oldang, pos, ang)
 	if !IsValid(vm) or !IsValid(self.Owner) then return end
+	
 	local reg = debug.getregistry()
 	local GetVelocity = reg.Entity.GetVelocity
-	local Length = reg.Vector.Length2D
-	local vel = Length(GetVelocity(self.Owner))
-	local hz = math.Clamp(vel/256, 0, .4)
-	local move = math.sin(CurTime() * 10.5)
-	local moveright = move *hz
-	local moveup = move *moveright /2
-	local bobscale = self.SBobScale
 	
-	if (!game.SinglePlayer() and IsFirstTimePredicted()) or game.SinglePlayer() then
-		if self.Owner:IsOnGround() then
-			t = Lerp(FrameTime()*16, t, 1)
-		else
-			t = math.max(Lerp(FrameTime()*7, t, 0.01), 0)
+	if cvar_bob:GetBool() then
+		local Length = reg.Vector.Length2D
+		local vel = Length(GetVelocity(self.Owner))
+		local hz = math.Clamp(vel/256, 0, .4)
+		local move = math.sin(CurTime() * 10.5)
+		local moveright = move *hz
+		local moveup = move *moveright /2
+		local bobscale = self.SBobScale * math.Clamp(-vertOffset + 1, 0, 1)
+		
+		if game.SinglePlayer() or IsFirstTimePredicted() then
+			local FT = FrameTime()
+			if self.Owner:IsOnGround() then
+				t = Lerp(FT*16, t, 1)
+			else
+				t = math.max(Lerp(FT*7, t, 0.01), 0)
+			end
 		end
-	end
 
-	local modelindex = vm:ViewModelIndex()
-	if modelindex == 0 then
-		pos = pos + moveright *bobscale * ang:Right() *t
-	else
-		pos = pos - moveright *bobscale * ang:Right() *t
-	end	
-	pos = pos + moveup *bobscale * ang:Up() *t
+		local modelindex = vm:ViewModelIndex()
+		if modelindex == 0 then
+			pos = pos + moveright *bobscale * ang:Right() *t
+		else
+			pos = pos - moveright *bobscale * ang:Right() *t
+		end	
+		pos = pos + moveup *bobscale * ang:Up() *t
+	end
+	
+	if self.Owner:GetMoveType() == MOVETYPE_WALK then
+		local vertVel = GetVelocity(self.Owner)[3]
+		if vertVel < 0 then
+			vertOffset = math.max(vertVel * .005, -.3)
+			vertOffsetSinTime = 0
+			vertOffsetSinMul = math.min(vertVel * -.00075, .4)
+		else
+			if game.SinglePlayer() or IsFirstTimePredicted() then
+				local FT = FrameTime()
+				if FT > 0 then
+					vertOffsetSinTime = vertOffsetSinTime + FT * 10
+					vertOffsetSinMul = Lerp(FT*5, vertOffsetSinMul, 0)
+					vertOffset = Lerp(FT*16, vertOffset, 0) + math.sin(vertOffsetSinTime) * vertOffsetSinMul
+				end
+			end
+		end
+		pos = pos - ang:Up() * vertOffset
+	end
 	
 	if self.EnableIdle then
 		pos = pos + math.sin(CurTime() * 1.3) * ang:Up() /26
@@ -508,11 +536,12 @@ function SWEP:CalcViewModelView(vm, oldpos, oldang, pos, ang)
 	if self.LaserPos then
 		local firetime = CurTime() - self:GetNextPrimaryFire()
 		local seq = self:GetSequence()
-		if !game.SinglePlayer() and IsFirstTimePredicted() or game.SinglePlayer() then
-			if firetime <= FrameTime() - .09 and self:Ammo1() > 0 and (seq == 0 or seq == 1 or seq == 2 or seq == 3) then
-				laseranim = math.Approach(laseranim, .75, FrameTime() * 60)
+		if game.SinglePlayer() or IsFirstTimePredicted() then
+			local FT = FrameTime()
+			if firetime <= FT - .09 and self:Ammo1() > 0 and (seq == 0 or seq == 1 or seq == 2 or seq == 3) then
+				laseranim = math.Approach(laseranim, .75, FT * 60)
 			end
-			laseranim = Lerp(FrameTime() * 20, laseranim, .0001)
+			laseranim = Lerp(FT * 20, laseranim, .0001)
 		end
 		pos = pos - laseranim * ang:Forward()
 		ang:RotateAroundAxis(ang:Right(), 4.5)
