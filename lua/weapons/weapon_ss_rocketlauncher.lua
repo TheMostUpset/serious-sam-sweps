@@ -13,7 +13,11 @@ end
 
 function SWEP:PrimaryAttack()
 	if !self:CanPrimaryAttack() then return end
-	self:SetNextPrimaryFire(CurTime() + self.Primary.Delay)
+	local delay, dmg = self.Primary.Delay, self.Primary.Damage
+	if self:IsDeathmatchRules() then
+		delay, dmg = self.Primary.DelayDM, self.Primary.DamageDM
+	end
+	self:SetNextPrimaryFire(CurTime() + delay)
 	self:SendWeaponAnim(ACT_VM_PRIMARYATTACK)
 	self.Owner:SetAnimation(PLAYER_ATTACK1)
 	self:WeaponSound(self.Primary.Sound)
@@ -28,7 +32,7 @@ function SWEP:PrimaryAttack()
 		ent:SetAngles(ang)
 		ent:SetPos(pos)
 		ent:SetOwner(self.Owner)
-		ent:SetDamage(self.Primary.Damage)
+		ent:SetDamage(dmg)
 		ent:SetVelocity(ang:Up() *40 +ang:Forward() *1500)
 		ent:Spawn()
 	end
@@ -61,7 +65,9 @@ SWEP.WorldModel			= "models/weapons/serioussam/w_rocketlauncher.mdl"
 
 SWEP.Primary.Sound			= Sound("weapons/serioussam/rocketlauncher/fire.wav")
 SWEP.Primary.Damage			= 100
+SWEP.Primary.DamageDM		= 80
 SWEP.Primary.Delay			= .7
+SWEP.Primary.DelayDM		= .6
 SWEP.Primary.DefaultClip	= 5
 SWEP.Primary.Ammo			= "RPG_Round"
 

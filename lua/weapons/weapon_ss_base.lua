@@ -20,6 +20,7 @@ else
 end
 
 local cvar_unlimitedammo = CreateConVar("ss_unlimitedammo", 0, {FCVAR_NOTIFY, FCVAR_REPLICATED}, "Unlimited ammo for Serious Sam weapons", 0, 1)
+local cvar_dmrules = CreateConVar("ss_sv_dmrules", 0, {FCVAR_NOTIFY, FCVAR_REPLICATED}, "Deathmatch rules for Serious Sam weapons (damage values, fire rate, etc)", 0, 1)
 
 game.AddAmmoType({
 	name = "cannonball"
@@ -79,6 +80,10 @@ end
 function SWEP:SpecialDataTables()
 end
 
+function SWEP:IsDeathmatchRules()
+	return cvar_dmrules:GetBool()
+end
+
 function SWEP:Initialize()
 	self:SetHoldType(self.HoldType)
 	self:SetDeploySpeed(self.DeployDelay)
@@ -112,15 +117,24 @@ end
 
 function SWEP:PrimaryAttack()
 	if !self:CanPrimaryAttack() then return end
-	self:SetNextPrimaryFire(CurTime() + self.Primary.Delay)
+	local delay, cone = self.Primary.Delay, self.Primary.Cone
+	if self:IsDeathmatchRules() then
+		if self.Primary.DelayDM then delay = self.Primary.DelayDM end
+		if self.Primary.ConeDM then cone = self.Primary.ConeDM end
+	end
+	self:SetNextPrimaryFire(CurTime() + delay)
 	self:SendWeaponAnim(ACT_VM_PRIMARYATTACK)
+	if self.Primary.AnimSpeed then self.Owner:GetViewModel():SetPlaybackRate(1 * self.Primary.AnimSpeed) end
 	self.Owner:SetAnimation(PLAYER_ATTACK1)
 	self:WeaponSound(self.Primary.Sound)
-	self:ShootBullet(self.Primary.Damage, self.Primary.NumShots, self.Primary.Cone)
+	self:ShootBullet(self.Primary.Damage, self.Primary.NumShots, cone)
 	self:SeriousFlash()
 	self:TakeAmmo(self.AmmoToTake)
 	self:IdleStuff()
 	self:HolsterDelay()
+	if self.EnableEndSmoke then
+		self.SmokeAmount = self.SmokeAmount + 1
+	end
 end
 
 function SWEP:SecondaryAttack()
@@ -138,6 +152,12 @@ function SWEP:HolsterDelay(time)
 end
 
 function SWEP:ResetBones()
+end
+
+function SWEP:OnRemove()
+	if self.EnableEndSmoke then
+		self.SmokeAmount = 0
+	end
 end
 
 function SWEP:Holster(wep)
@@ -241,12 +261,26 @@ function SWEP:Think()
 		end
 	end
 	
+	if self.EnableEndSmoke then
+		self:EndSmokeThink()
+	end
+	
 	if !game.SinglePlayer() and self:GetHolster() then
 		self:ResetBones()
 	end
 end
 
 function SWEP:SpecialThink()
+end
+
+function SWEP:EndSmokeThink()
+	if self.Owner:KeyReleased(IN_ATTACK) or self.Owner:GetAmmoCount(self.Primary.Ammo) <= 0 then
+		if self.SmokeAmount > 0 then
+			local num = game.SinglePlayer() and 90 or 200
+			self.SmokeTime = CurTime() + math.min(self.SmokeAmount/num, 1.5)
+			self.SmokeAmount = 0
+		end
+	end
 end
 
 function SWEP:ShootBullet(dmg, numbul, cone)

@@ -34,12 +34,16 @@ function SWEP:PrimaryAttack()
 	end
 
 	if self:GetAttackDelay() >= self.BarrelAccelTime then
-		self:SetNextPrimaryFire(CurTime() + self.Primary.Delay)
+		local delay, dmg, cone = self.Primary.Delay, self.Primary.Damage, self.Primary.Cone
+		if self:IsDeathmatchRules() then
+			delay, dmg, cone = self.Primary.DelayDM, self.Primary.DamageDM, self.Primary.ConeDM
+		end
+		self:SetNextPrimaryFire(CurTime() + delay)
 		self:SendWeaponAnim(ACT_VM_PRIMARYATTACK)
 		self.Owner:SetAnimation(PLAYER_ATTACK1)
 		self:PrimarySoundStart()
 		self:WeaponSound(self.Primary.Sound)
-		self:ShootBullet(self.Primary.Damage, self.Primary.NumShots, self.Primary.Cone)
+		self:ShootBullet(dmg, self.Primary.NumShots, cone)
 		self:SeriousFlash()
 		self:TakeAmmo(self.AmmoToTake)
 		self:HolsterDelay(self:GetNextPrimaryFire())
@@ -47,6 +51,9 @@ function SWEP:PrimaryAttack()
 			self.SmokeAmount = self.SmokeAmount + 1
 		end
 	end
+end
+
+function SWEP:EndSmokeThink() -- overriding because we have a bit different code here
 end
 
 function SWEP:SpecialThink()
@@ -135,7 +142,10 @@ SWEP.Primary.Sound			= Sound("weapons/serioussam/minigun/Fire.wav")
 SWEP.Primary.Special		= Sound("Weapon_Sam_MiniGun.Click")
 SWEP.Primary.Special1		= Sound("weapons/serioussam/minigun/Rotate.wav")
 SWEP.Primary.Cone			= .015
+SWEP.Primary.ConeDM			= .025
+SWEP.Primary.DamageDM		= 20
 SWEP.Primary.Delay			= .05
+SWEP.Primary.DelayDM		= .078
 SWEP.Primary.DefaultClip	= 100
 SWEP.Primary.Ammo			= "smg1"
 

@@ -51,6 +51,7 @@ SWEP.Primary.Sound			= Sound("weapons/serioussam/doubleshotgun/Fire.wav")
 SWEP.Primary.NumShots		= 14
 SWEP.Primary.Cone			= .08
 SWEP.Primary.Delay			= 1.65
+SWEP.Primary.DelayDM		= 1
 SWEP.Primary.DefaultClip	= 20
 SWEP.Primary.Ammo			= "Buckshot"
 

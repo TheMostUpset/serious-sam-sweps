@@ -91,9 +91,9 @@ function SWEP:PrimaryAttack()
 	self.Owner:SetAnimation(PLAYER_ATTACK1)
 	self:WeaponSound(self.Primary.Sound)
 	
-	local dmg = self.Primary.Damage
+	local dmg = self:IsDeathmatchRules() and self.Primary.DamageDM or self.Primary.Damage
 	if self:GetZoom() then
-		dmg = self.Primary.DamageZoom
+		dmg = self:IsDeathmatchRules() and self.Primary.DamageZoomDM or self.Primary.DamageZoom
 	end
 	
 	self:ShootBullet(dmg, self.Primary.NumShots, self.Primary.Cone)
@@ -181,7 +181,9 @@ SWEP.WorldModel			= "models/weapons/serioussam/w_sniper.mdl"
 SWEP.Primary.Sound			= Sound("weapons/serioussam/sniper/Fire.wav")
 SWEP.Primary.Special1		= Sound("weapons/serioussam/sniper/Zoom.wav")
 SWEP.Primary.Damage			= 70
+SWEP.Primary.DamageDM		= 50
 SWEP.Primary.DamageZoom		= 300
+SWEP.Primary.DamageZoomDM	= 100
 SWEP.Primary.Cone			= .001
 SWEP.Primary.Delay			= 1.4
 SWEP.Primary.DefaultClip	= 15
