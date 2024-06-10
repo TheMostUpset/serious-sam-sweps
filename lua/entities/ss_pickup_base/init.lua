@@ -5,8 +5,9 @@ include('shared.lua')
 util.AddNetworkString("SSPickupText")
 
 ENT.SpawnHeight = 35
-ENT.RespawnTime = 10
+ENT.RespawnTime = 20
 ENT.ResizeModel = true
+ENT.ModelScale = 2 --2.5?
 ENT.TriggerBounds = 32
 
 function ENT:SpawnFunction(ply, tr)
@@ -22,7 +23,7 @@ end
 function ENT:Initialize()
 	self:SetModel(self.model)
 	if self.ResizeModel then
-		self:SetModelScale(2, 0)
+		self:SetModelScale(self.ModelScale, 0)
 	end
 	self:SetMoveType(MOVETYPE_NONE)
 	self:SetSolid(SOLID_NONE)
@@ -35,7 +36,7 @@ function ENT:Initialize()
 	self:UseTriggerBounds(true, self.TriggerBounds)
 	if self:GetDropped() then
 		SafeRemoveEntityDelayed(self, 30)
-	else
+	else--if !self:CreatedByMap() then
 		self:EmitSound("misc/serioussam/teleport.wav")
 	end
 end
