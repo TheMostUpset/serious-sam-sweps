@@ -2,18 +2,19 @@ include('shared.lua')
 
 function ENT:Initialize()
 	self.OriginPos = self:GetPos()
-	self.Rotate = 0
 	self.RotateTime = RealTime()
 end
 
 local flare = Material("sprites/glow04_noz")
 
 function ENT:Draw()
-	self:SetRenderOrigin(self.OriginPos + Vector(0,0,math.sin(RealTime() * 6) *3.5))
+	if !self:GetDropped() then
+		self:SetRenderOrigin(self.OriginPos + Vector(0,0,math.sin(RealTime() * 6) *3.5))
+	end
 	self:SetupBones()
 	self:DrawModel()
-	self.Rotate = (RealTime() - self.RotateTime)*180 %360
-	self:SetAngles(Angle(0,self.Rotate,0))
+	local Rotate = (RealTime() - self.RotateTime)*180 %360
+	self:SetAngles(Angle(0,Rotate,0))
 	
 	if game.SinglePlayer() then
 		local dist = LocalPlayer():GetPos():Distance(self.OriginPos) / 8

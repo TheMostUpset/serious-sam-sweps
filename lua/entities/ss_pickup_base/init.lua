@@ -10,7 +10,7 @@ ENT.ResizeModel = true
 ENT.TriggerBounds = 32
 
 function ENT:SpawnFunction(ply, tr)
-	if (!tr.Hit) then return end
+	if !tr.Hit then return end
 	local ent = ents.Create(self.ClassName)
 	local SpawnPos = tr.HitPos + tr.HitNormal * ent.SpawnHeight
 	ent:SetPos(SpawnPos)
@@ -33,7 +33,11 @@ function ENT:Initialize()
 	self:SetRenderMode(RENDERMODE_TRANSALPHA)
 	self:SetTrigger(true)
 	self:UseTriggerBounds(true, self.TriggerBounds)
-	self:EmitSound("misc/serioussam/teleport.wav")
+	if self:GetDropped() then
+		SafeRemoveEntityDelayed(self, 30)
+	else
+		self:EmitSound("misc/serioussam/teleport.wav")
+	end
 end
 
 function ENT:Think()
@@ -42,11 +46,26 @@ function ENT:Think()
 		self.Available = true
 		self:SetNoDraw(false)
 	end
+	
+	if self:GetDropped() then
+		local tr = util.TraceHull({
+			start = self:GetPos(),
+			endpos = self:GetPos() - Vector(0,0,50),
+			filter = self,
+			mins = Vector(-16, -16, -32),
+			maxs = Vector(16, 16, 16)
+		})
+		if self:GetPos() != tr.HitPos then
+			self:SetPos(tr.HitPos)
+			self:NextThink(CurTime() + .1)
+			return true
+		end
+	end
 end
 
 function ENT:Touch(ent)
 	if IsValid(ent) and ent:IsPlayer() and ent:Alive() and self.Available then
-		if game.SinglePlayer() then
+		if game.SinglePlayer() or self:GetDropped() then
 			self:Remove()
 		else
 			self.Available = false
@@ -54,20 +73,31 @@ function ENT:Touch(ent)
 			self.ReEnabled = CurTime() + self.RespawnTime
 		end
 		ent:EmitSound("items/serioussam/Weapon.wav", 85)
+		self:Special(ent)
 		if ent:HasWeapon(self.WeapName) then
-			local wep = ent:GetWeapon(self.WeapName) 
-			local ammoType = wep.Primary.Ammo
-			if ammoType != "none" then
-				local ammoGive = wep.Primary.DefaultClip
-				local ammoCount = ent:GetAmmoCount(ammoType)
-				if ammoCount < self.MaxAmmo then
-					ent:SetAmmo(math.min(ammoCount + ammoGive, self.MaxAmmo), ammoType)
+			local wep = ent:GetWeapon(self.WeapName)
+			local ammoGive = self.AmmoToGive or wep.Primary.DefaultClip
+			self:GiveAmmo(ent, wep.Primary.Ammo, ammoGive)
+		else
+			if self.AmmoToGive then
+				local wep = ent:Give(self.WeapName, true) -- giving without ammo
+				if IsValid(wep) then
+					self:GiveAmmo(ent, wep.Primary.Ammo, self.AmmoToGive) -- giving our own ammo value
 				end
+			else
+				ent:Give(self.WeapName) -- giving with default ammo
 			end
 		end
-		self:Special(ent)
-		ent:Give(self.WeapName)
 		self:SendPickupMsg(ent)
+	end
+end
+
+function ENT:GiveAmmo(ply, ammoType, ammoGive)
+	if ammoType != "none" then
+		local ammoCount = ply:GetAmmoCount(ammoType)
+		if ammoCount < self.MaxAmmo then
+			ply:SetAmmo(math.min(ammoCount + ammoGive, self.MaxAmmo), ammoType)
+		end
 	end
 end
 

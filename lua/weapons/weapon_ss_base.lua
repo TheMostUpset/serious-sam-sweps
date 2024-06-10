@@ -94,7 +94,7 @@ function SWEP:OnRestore()
 end
 
 function SWEP:Equip(ply)
-	if !IsValid(ply) or !ply:IsPlayer() then return end
+	if self:IsDeathmatchRules() or !IsValid(ply) or !ply:IsPlayer() then return end
 	local cvar = "ss_ammomultiplier"
 	if cvars.Bool(cvar) then
 		local multiplier = math.Clamp(cvars.Number(cvar, 1), 0, 9999)
