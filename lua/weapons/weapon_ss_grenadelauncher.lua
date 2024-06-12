@@ -71,6 +71,9 @@ SWEP.Base				= "weapon_ss_base"
 SWEP.Category			= "Serious Sam"
 SWEP.Spawnable			= true
 
+SWEP.EntityPickup		= "ss_pickup_grenadel"
+SWEP.EntityAmmo			= "ss_ammo_grenades"
+
 SWEP.ViewModel			= "models/weapons/serioussam/v_grenadelauncher.mdl"
 SWEP.WorldModel			= "models/weapons/serioussam/w_grenadelauncher.mdl"
 

@@ -30,6 +30,9 @@ SWEP.Base				= "weapon_ss_base"
 SWEP.Category			= "Serious Sam"
 SWEP.Spawnable			= true
 
+SWEP.EntityPickup		= "ss_pickup_shotgun"
+SWEP.EntityAmmo			= "ss_ammo_shells"
+
 SWEP.ViewModel			= "models/weapons/serioussam/v_singleshotgun.mdl"
 SWEP.WorldModel			= "models/weapons/serioussam/w_singleshotgun.mdl"
 

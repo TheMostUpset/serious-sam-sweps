@@ -66,6 +66,8 @@ SWEP.Base				= "weapon_ss_base"
 SWEP.Category			= "Serious Sam"
 SWEP.Spawnable			= true
 
+SWEP.EntityPickup		= "ss_pickup_colt"
+
 SWEP.ViewModel			= "models/weapons/serioussam/v_colt.mdl"
 SWEP.WorldModel			= "models/weapons/serioussam/w_colt.mdl"
 

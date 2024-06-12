@@ -78,6 +78,9 @@ SWEP.Base				= "weapon_ss_base"
 SWEP.Category			= "Serious Sam"
 SWEP.Spawnable			= true
 
+SWEP.EntityPickup		= "ss_pickup_cannon"
+SWEP.EntityAmmo			= "ss_ammo_cannonballs"
+
 SWEP.ViewModel			= "models/weapons/serioussam/v_cannon.mdl"
 SWEP.WorldModel			= "models/weapons/serioussam/w_cannon.mdl"
 

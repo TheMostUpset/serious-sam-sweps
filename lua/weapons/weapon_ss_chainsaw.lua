@@ -165,6 +165,8 @@ SWEP.Base				= "weapon_ss_base"
 SWEP.Category			= "Serious Sam"
 SWEP.Spawnable			= true
 
+SWEP.EntityPickup		= "ss_pickup_chainsaw"
+
 SWEP.ViewModel			= "models/weapons/serioussam/v_chainsaw.mdl"
 SWEP.WorldModel			= "models/weapons/serioussam/w_chainsaw.mdl"
 

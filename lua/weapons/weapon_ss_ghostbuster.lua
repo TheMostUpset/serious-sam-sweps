@@ -130,6 +130,9 @@ SWEP.Base				= "weapon_ss_base"
 SWEP.Category			= "Serious Sam"
 SWEP.Spawnable			= true
 
+SWEP.EntityPickup		= "ss_pickup_ghostbuster"
+SWEP.EntityAmmo			= "ss_ammo_electricity"
+
 SWEP.ViewModel			= "models/weapons/serioussam/v_ghostbuster.mdl"
 SWEP.WorldModel			= "models/weapons/serioussam/w_ghostbuster.mdl"
 
