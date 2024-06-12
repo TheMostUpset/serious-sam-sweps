@@ -561,7 +561,7 @@ function SWEP:CalcViewModelView(vm, oldpos, oldang, pos, ang)
 				if FT > 0 then
 					vertOffsetSinTime = vertOffsetSinTime + FT * 10
 					vertOffsetSinMul = Lerp(FT*5, vertOffsetSinMul, 0)
-					vertOffset = Lerp(FT*16, vertOffset, 0) + math.sin(vertOffsetSinTime) * vertOffsetSinMul
+					vertOffset = Lerp(FT*16, vertOffset, 0) + math.sin(vertOffsetSinTime) * vertOffsetSinMul * FT*100
 				end
 			end
 		end
