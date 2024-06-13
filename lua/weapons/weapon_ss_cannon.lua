@@ -35,25 +35,30 @@ function SWEP:SpecialThink()
 end	
 
 function SWEP:Release()
-	self:SetNextPrimaryFire(CurTime() +self.Primary.Delay)
+	self:SetNextPrimaryFire(CurTime() + self.Primary.Delay)
 	self:SendWeaponAnim(ACT_VM_PRIMARYATTACK)
 	self.Owner:SetAnimation(PLAYER_ATTACK1)
 	self:WeaponSound(self.Primary.Sound)
 	self:TakeAmmo(1)
 	self:IdleStuff()
 	self:HolsterDelay()
+	self:CreateCannonball()
+	self:OnRemove()
+end
+
+function SWEP:CreateCannonball()
 	local attdelay = self:GetAttackDelay()
 	local pos = self.Owner:GetShootPos()
 	local ang = self.Owner:GetAimVector():Angle()
 	local damage = math.Clamp(self.Primary.Damage *(CurTime() - attdelay+1.65), self.Primary.Damage, 750)
 	damage = math.Round(damage)
-	pos = pos +ang:Forward() *-20 +ang:Right() *2
+	pos = pos + ang:Forward() * -20 + ang:Right() * 2
 	if SERVER then
-		local ent = ents.Create("ss_cannonball")
+		local ent = ents.Create(self.EntityProjectile)
 		ent:SetPos(pos)
 		ent:SetAngles(ang)
 		ent:SetOwner(self.Owner)
-		ent:SetExplodeDelay(9.5)
+		ent:SetExplodeDelay(self.ExplodeDelay)
 		ent:SetDamage(damage)
 		ent:Spawn()
 		ent:Activate()
@@ -65,7 +70,6 @@ function SWEP:Release()
 			phys:SetVelocity(vel)
 		end
 	end
-	self:OnRemove()
 end
 
 function SWEP:OnRemove()
@@ -90,3 +94,6 @@ SWEP.Primary.Damage			= 500
 SWEP.Primary.Delay			= 1.3
 SWEP.Primary.DefaultClip	= 1
 SWEP.Primary.Ammo			= "cannonball"
+
+SWEP.EntityProjectile		= "ss_cannonball"
+SWEP.ExplodeDelay			= 9.5
