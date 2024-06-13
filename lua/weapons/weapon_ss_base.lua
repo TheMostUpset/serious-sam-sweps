@@ -57,8 +57,6 @@ SWEP.UseHolsterAnim			= true
 
 SWEP.LaserPos				= false
 
-SWEP.SBobScale				= 1
-
 local SSAM_STATE_DEPLOY = 0
 local SSAM_STATE_HOLSTER = 1
 local SSAM_STATE_IDLE = 2
@@ -504,6 +502,10 @@ end
 
 if SERVER then return end
 
+SWEP.SBobScale				= 1
+SWEP.SBobSpeed				= 10.5
+SWEP.SBobFadeSpeedInAir		= 5
+
 local t = 1
 local laseranim = 0
 local vertOffset = 0
@@ -524,7 +526,7 @@ function SWEP:CalcViewModelView(vm, oldpos, oldang, pos, ang)
 		local Length = reg.Vector.Length2D
 		local speed = Length(ownerVelocity)
 		speed = math.Clamp(speed/256, 0, .4)
-		local bobspeed = 10.5
+		local bobspeed = self.SBobSpeed
 		local sine = math.sin(CurTime() * bobspeed)
 		local bobright = sine * speed
 		local bobup = sine * bobright / 2
@@ -536,7 +538,7 @@ function SWEP:CalcViewModelView(vm, oldpos, oldang, pos, ang)
 				if self.Owner:IsOnGround() then
 					t = Lerp(FT*16, t, 1)
 				else
-					t = math.max(Lerp(FT*7, t, 0.01), 0)
+					t = math.max(Lerp(FT*self.SBobFadeSpeedInAir, t, 0.01), 0)
 				end
 			end
 		end
