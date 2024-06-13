@@ -61,7 +61,7 @@ function SWEP:PrimaryAttack()
 	})
 		
 	if SERVER then
-		local ent = ents.Create("ss_laser")
+		local ent = ents.Create(self.EntityProjectile)
 		ent:SetAngles(ang)
 		ent:SetPos(tr.HitPos)
 		ent:SetOwner(self.Owner)
@@ -115,6 +115,7 @@ SWEP.Primary.Damage			= 20
 SWEP.Primary.Delay			= .1
 SWEP.Primary.DefaultClip	= 50
 SWEP.Primary.Ammo			= "ar2"
+SWEP.EntityProjectile		= "ss_laser"
 SWEP.ProjectileSpeed		= 3500 -- max source engine speed?
 
 SWEP.LaserPos				= true

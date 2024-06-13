@@ -23,12 +23,16 @@ function SWEP:PrimaryAttack()
 	self:WeaponSound(self.Primary.Sound)
 	self:TakeAmmo(1)
 	self:IdleStuff()
-	
+	self:CreateRocket(dmg)
+	self:HolsterDelay()
+end
+
+function SWEP:CreateRocket(dmg)
 	if SERVER then
 		local pos = self.Owner:GetShootPos()
 		local ang = self.Owner:GetAimVector():Angle()
 		pos = pos +ang:Right() *1 -ang:Up() *7 -ang:Forward() *9
-		local ent = ents.Create("ss_rocket")
+		local ent = ents.Create(self.EntityProjectile)
 		ent:SetAngles(ang)
 		ent:SetPos(pos)
 		ent:SetOwner(self.Owner)
@@ -36,7 +40,6 @@ function SWEP:PrimaryAttack()
 		ent:SetVelocity(ang:Up() *40 +ang:Forward() *1500)
 		ent:Spawn()
 	end
-	self:HolsterDelay()
 end
 
 if SERVER then
@@ -75,3 +78,5 @@ SWEP.Primary.DefaultClip	= 5
 SWEP.Primary.Ammo			= "RPG_Round"
 
 SWEP.DeployDelay			= 1
+
+SWEP.EntityProjectile		= "ss_rocket"
