@@ -612,20 +612,29 @@ function SWEP:DrawHUD()
 end
 
 local cvar_crosshair = CreateClientConVar("ss_crosshair", 1)
+local crosshair_table = {
+	surface.GetTextureID("vgui/serioussam/Crosshair1"),
+	surface.GetTextureID("vgui/serioussam/Crosshair2"),
+	surface.GetTextureID("vgui/serioussam/Crosshair3"),
+	surface.GetTextureID("vgui/serioussam/Crosshair4"),
+	surface.GetTextureID("vgui/serioussam/Crosshair5"),
+	surface.GetTextureID("vgui/serioussam/Crosshair6"),
+	surface.GetTextureID("vgui/serioussam/Crosshair7")
+}
 function SWEP:Crosshair()
 	local x, y = ScrW() / 2, ScrH() / 2
 	local tr = self.Owner:GetEyeTraceNoCursor()
 	
-	if (self.Owner == LocalPlayer() && self.Owner:ShouldDrawLocalPlayer()) then
+	if self.Owner == LocalPlayer() && self.Owner:ShouldDrawLocalPlayer() then
 		local coords = tr.HitPos:ToScreen()
 		x, y = coords.x, coords.y
 	end
 
-	local dist = math.Round(-self.Owner:GetPos():Distance(self.Owner:GetEyeTraceNoCursor().HitPos) /12) +64
+	local dist = math.Round(-self.Owner:GetPos():Distance(tr.HitPos) /12) +64
 	dist = math.Clamp(dist, 32, 128)
 
 	local getcvar = cvar_crosshair:GetInt()
-	if getcvar <= 0 or getcvar > 7 then return end
+	if getcvar <= 0 or getcvar > #crosshair_table then return end
 	
 	local colr, colg, colb = 255, 255, 255
 	-- NPC health won't update in singleplayer if ai_disabled is 1
@@ -640,7 +649,7 @@ function SWEP:Crosshair()
 		end
 	end
 	
-	surface.SetTexture(surface.GetTextureID("vgui/serioussam/Crosshair"..getcvar))
+	surface.SetTexture(crosshair_table[getcvar])
 	surface.SetDrawColor(colr, colg, colb, 255)
 	surface.DrawTexturedRect(x - dist /2 -1, y - dist /2 +1, dist, dist)
 end
