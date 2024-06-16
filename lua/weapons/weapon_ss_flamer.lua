@@ -100,7 +100,7 @@ function SWEP:DoFire(damage, igniteTime)
 				dmginfo:SetDamageType(DMG_SLOWBURN)
 				dmginfo:SetDamage(damage)
 				dmginfo:SetDamageForce(self.Owner:GetUp() *1000 +self.Owner:GetForward() *4000)
-				if IsValid(tr.Entity) then
+				if IsValid(tr.Entity) and tr.Entity:WaterLevel() < 3 then
 					tr.Entity:TakeDamageInfo(dmginfo)
 					tr.Entity:Ignite(igniteTime)
 				end
@@ -111,7 +111,7 @@ function SWEP:DoFire(damage, igniteTime)
 						endpos = v:GetPos(),
 						filter = {self.Owner, tr.Entity}
 					})
-					if IsValid(trace.Entity) and trace.Entity == v and self:IsCreature(trace.Entity) then
+					if IsValid(trace.Entity) and trace.Entity == v and trace.Entity:WaterLevel() < 3 and self:IsCreature(trace.Entity) then
 						trace.Entity:Ignite(igniteTime)
 						trace.Entity:TakeDamageInfo(dmginfo)
 					end
