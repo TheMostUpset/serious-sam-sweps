@@ -40,7 +40,7 @@ local function CreateSeriousFonts()
 	local scale = SeriousHUD:GetHUDScale()
 
 	surface.CreateFont("seriousHUDfont", {
-		font = "default",
+		font = "Tahoma",
 		size = ScrH()/12 * scale,
 		weight = 600,
 		blursize = 1
