@@ -89,6 +89,14 @@ net.Receive("SSPickupText", function()
 	end
 	pickuptextTime = RealTime() + 2
 end)
+function SeriousHUD:DrawPickupText()
+	if pickuptext and pickuptextTime and pickuptextTime > RealTime() then
+		local text = pickupamount > 0 and pickuptext.." +".. pickupamount or pickuptext
+		draw.SimpleText(text, "seriousHUDpickuptext", ScrW() / 2 + 1, ScrH() / 1.24 + 1, Color(0, 0, 0, 255), TEXT_ALIGN_CENTER)
+		draw.SimpleText(text, "seriousHUDpickuptext", ScrW() / 2 + 2, ScrH() / 1.24 + 2, Color(0, 0, 0, 100), TEXT_ALIGN_CENTER)
+		draw.SimpleText(text, "seriousHUDpickuptext", ScrW() / 2, ScrH() / 1.24, Color(255, 255, 255, 255), TEXT_ALIGN_CENTER)
+	end
+end
 
 local HSuper = 1
 local ArMedium = 2
@@ -590,12 +598,7 @@ function SeriousHUD:Draw()
 		end
 	end
 
-	if pickuptext and pickuptextTime and pickuptextTime > RealTime() then
-		local text = pickupamount > 0 and pickuptext.." +".. pickupamount or pickuptext
-		draw.SimpleText(text, "seriousHUDpickuptext", ScrW() / 2 + 1, ScrH() / 1.24 + 1, Color(0, 0, 0, 255), TEXT_ALIGN_CENTER)
-		draw.SimpleText(text, "seriousHUDpickuptext", ScrW() / 2 + 2, ScrH() / 1.24 + 2, Color(0, 0, 0, 100), TEXT_ALIGN_CENTER)
-		draw.SimpleText(text, "seriousHUDpickuptext", ScrW() / 2, ScrH() / 1.24, Color(255, 255, 255, 255), TEXT_ALIGN_CENTER)
-	end
+	SeriousHUD:DrawPickupText()
 end
 hook.Add("HUDPaint", "SeriousHUD", SeriousHUD.Draw)
 
