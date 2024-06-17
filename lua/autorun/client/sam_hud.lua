@@ -32,6 +32,20 @@ function SeriousHUD:GetColor()
 	return 255, 255, 255
 end
 
+function SeriousHUD:GetFrameColor()
+	if SeriousHUD:GetSkin() == 1 then
+		return SeriousHUD:GetColor()
+	end
+	return 90, 120, 180
+end
+
+function SeriousHUD:GetTextColor()
+	if SeriousHUD:GetSkin() == 1 then
+		return SeriousHUD:GetColor()
+	end
+	return 255, 230, 0
+end
+
 function SeriousHUD:GetBlinkColor()
 	return math.Clamp(math.sin(RealTime() * 12.5) * 4000, 40, 255)
 end
@@ -104,7 +118,7 @@ local AmRockets = 23
 local AmShells = 24
 local AmSniperBullets = 25
 
-local hudicons = {
+SeriousHUD.Textures = {
 	{
 		[HSuper] = surface.GetTextureID("vgui/serioussam/hud_tfe/HSuper"),
 		[ArMedium] = surface.GetTextureID("vgui/serioussam/hud_tfe/ArStrong"),
@@ -197,6 +211,18 @@ SeriousHUD.WeaponIcons = {
 	["weapon_sshd_laser"] = WLaser,
 	["weapon_sshd_cannon"] = WCannon
 }
+
+function SeriousHUD:GetTexTable()
+	return SeriousHUD.Textures[SeriousHUD:GetSkin()]
+end
+
+function SeriousHUD:GetTexture(tex)
+	return SeriousHUD:GetTexTable()[tex]
+end
+
+function SeriousHUD:GetWeaponIcon(class)
+	return SeriousHUD:GetTexture(SeriousHUD.WeaponIcons[class])
+end
 
 local hl2weapons = {
 	["weapon_crowbar"] = "6",
@@ -318,7 +344,7 @@ function SeriousHUD:Draw()
 		local client = LocalPlayer()
 		local awep = client:GetActiveWeapon()
 		
-		local icons = hudicons[SeriousHUD:GetSkin()]
+		local icons = SeriousHUD:GetTexTable()
 		
 		local size = ScrH() / 14.75 * SeriousHUD:GetHUDScale()
 		local gap_screen = ScrH() / 80
@@ -333,12 +359,8 @@ function SeriousHUD:Draw()
 		local ammorectx = cntr + size + gap_rect
 		local ammoiconrectx = ammorectx + widerect_w + gap_rect
 		
-		local hudr, hudg, hudb = 90, 120, 180
-		local textr, textg, textb = 255, 230, 0
-		if SeriousHUD:GetSkin() == 1 then
-			hudr, hudg, hudb = SeriousHUD:GetColor()
-			textr, textg, textb = SeriousHUD:GetColor()
-		end
+		local hudr, hudg, hudb = SeriousHUD:GetFrameColor()
+		local textr, textg, textb = SeriousHUD:GetTextColor()
 		local rect, recta = 0, 160
 		
 		local armor = client:Alive() and client:Armor() or 0
@@ -382,10 +404,7 @@ function SeriousHUD:Draw()
 			hpcolr, hpcolg, hpcolb = 255, 255, 255
 		end
 		
-		local hp_icon_r, hp_icon_g, hp_icon_b = 255, 255, 255
-		if SeriousHUD:GetSkin() == 1 then
-			hp_icon_r, hp_icon_g, hp_icon_b = SeriousHUD:GetColor()
-		end
+		local hp_icon_r, hp_icon_g, hp_icon_b = SeriousHUD:GetColor()
 		local hp_icon_blink = 1		
 		if hp <= 10 then
 			hp_icon_blink = SeriousHUD:GetBlinkColor() / 255
@@ -404,10 +423,7 @@ function SeriousHUD:Draw()
 		//armor
 		
 		if armor > 0 then
-			local armor_icon_r, armor_icon_g, armor_icon_b = 255, 255, 255
-			if SeriousHUD:GetSkin() == 1 then
-				armor_icon_r, armor_icon_g, armor_icon_b = SeriousHUD:GetColor()
-			end
+			local armor_icon_r, armor_icon_g, armor_icon_b = SeriousHUD:GetColor()
 			surface.SetTexture(icons[ArMedium])
 			surface.SetDrawColor(armor_icon_r, armor_icon_g, armor_icon_b, 255)
 			surface.DrawTexturedRect(gap_screen +armor_jit_x, armor_y +armor_jit_y, size, size)
@@ -439,10 +455,7 @@ function SeriousHUD:Draw()
 			
 			local wicn = SeriousHUD.WeaponIcons[class]
 			local hl2 = hl2weapons[class]
-			local wep_icon_r, wep_icon_g, wep_icon_b = 255, 255, 255
-			if SeriousHUD:GetSkin() == 1 then
-				wep_icon_r, wep_icon_g, wep_icon_b = SeriousHUD:GetColor()
-			end
+			local wep_icon_r, wep_icon_g, wep_icon_b = SeriousHUD:GetColor()
 			if wicn then
 				surface.SetTexture(icons[wicn])
 				surface.SetDrawColor(wep_icon_r, wep_icon_g, wep_icon_b, 255)
@@ -474,10 +487,7 @@ function SeriousHUD:Draw()
 			end
 			
 			local ammo_text_r, ammo_text_g, ammo_text_b = textr, textg, textb
-			local ammo_icon_r, ammo_icon_g, ammo_icon_b = 255, 255, 255
-			if SeriousHUD:GetSkin() == 1 then
-				ammo_icon_r, ammo_icon_g, ammo_icon_b = SeriousHUD:GetColor()
-			end
+			local ammo_icon_r, ammo_icon_g, ammo_icon_b = SeriousHUD:GetColor()
 			local ammo_icon_blink = 1
 			local findammotype = ammoicons[atypeName]
 			if findammotype and awep:IsScripted() and (awep.Base == "weapon_ss_base" or awep.Base == "weapon_sshd_base") then
@@ -552,9 +562,9 @@ function SeriousHUD:Draw()
 					
 					local ammodata = ammoicons[v]
 					if ammodata then
-						local icon_r, icon_g, icon_b = 255, 255, 255
-						if SeriousHUD:GetSkin() == 1 and curammo != game.GetAmmoID(v) then
-							icon_r, icon_g, icon_b = SeriousHUD:GetColor()
+						local icon_r, icon_g, icon_b = SeriousHUD:GetColor()
+						if SeriousHUD:GetSkin() == 1 and curammo == game.GetAmmoID(v) then
+							icon_r, icon_g, icon_b = 255, 255, 255
 						end
 						surface.SetTexture(icons[ammodata.icon])
 						surface.SetDrawColor(icon_r, icon_g, icon_b, 255)
