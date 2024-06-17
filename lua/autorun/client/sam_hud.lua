@@ -1,5 +1,9 @@
-local cvar_enable = CreateClientConVar("ss_hud", 0)
-local cvar_ammoicons = CreateClientConVar("ss_hud_ammoicons", 1)
+local cvar_enable = CreateClientConVar("ss_hud", 0, true, false, "Enable Serious Sam Classic HUD", 0, 1)
+local cvar_ammoicons = CreateClientConVar("ss_hud_ammoicons", 1, true, false, "Show ammo icons on Serious Sam Classic HUD", 0, 1)
+local cvar_skin = CreateClientConVar("ss_hud_skin", 2, true, false, "1 - TFE, 2 - TSE", 1, 2)
+local cvar_colR = CreateClientConVar("ss_hud_color_r", 0)
+local cvar_colG = CreateClientConVar("ss_hud_color_g", 255)
+local cvar_colB = CreateClientConVar("ss_hud_color_b", 0)
 
 SeriousHUD = {}
 
@@ -15,6 +19,21 @@ end
 
 function SeriousHUD:GetHUDScale()
 	return 1
+end
+
+function SeriousHUD:GetSkin()
+	return cvar_skin:GetInt()
+end
+
+function SeriousHUD:GetColor()
+	if SeriousHUD:GetSkin() == 1 then
+		return cvar_colR:GetInt(), cvar_colG:GetInt(), cvar_colB:GetInt()
+	end
+	return 255, 255, 255
+end
+
+function SeriousHUD:GetBlinkColor()
+	return math.Clamp(math.sin(RealTime() * 12.5) * 4000, 40, 255)
 end
 
 local function CreateSeriousFonts()
@@ -57,33 +76,94 @@ net.Receive("SSPickupText", function()
 	pickuptextTime = RealTime() + 2
 end)
 
-local t_hearth = surface.GetTextureID("vgui/serioussam/hud/HSuper")
-local ArMedium = surface.GetTextureID("vgui/serioussam/hud/ArMedium")
+local HSuper = 1
+local ArMedium = 2
 
-local WCannon = surface.GetTextureID("vgui/serioussam/hud/WCannon")
-local WChainsaw = surface.GetTextureID("vgui/serioussam/hud/WChainsaw")
-local WColt = surface.GetTextureID("vgui/serioussam/hud/WColt")
-local WColtDual = surface.GetTextureID("vgui/serioussam/hud/WColtDual")
-local WDoubleShotgun = surface.GetTextureID("vgui/serioussam/hud/WDoubleShotgun")
-local WFlamer = surface.GetTextureID("vgui/serioussam/hud/WFlamer")
-local WGhostBuster = surface.GetTextureID("vgui/serioussam/hud/WGhostBuster")
-local WGrenadeLauncher = surface.GetTextureID("vgui/serioussam/hud/WGrenadeLauncher")
-local WKnife = surface.GetTextureID("vgui/serioussam/hud/WKnife")
-local WLaser = surface.GetTextureID("vgui/serioussam/hud/WLaser")
-local WMinigun = surface.GetTextureID("vgui/serioussam/hud/WMinigun")
-local WRocketLauncher = surface.GetTextureID("vgui/serioussam/hud/WRocketLauncher")
-local WSingleShotgun = surface.GetTextureID("vgui/serioussam/hud/WSingleShotgun")
-local WSniper = surface.GetTextureID("vgui/serioussam/hud/WSniper")
-local WTommygun = surface.GetTextureID("vgui/serioussam/hud/WTommygun")
+local WCannon = 3
+local WChainsaw = 4
+local WColt = 5
+local WColtDual = 6
+local WDoubleShotgun = 7
+local WFlamer = 8
+local WGhostBuster = 9
+local WGrenadeLauncher = 10
+local WKnife = 11
+local WLaser = 12
+local WMinigun = 13
+local WRocketLauncher = 14
+local WSingleShotgun = 15
+local WSniper = 16
+local WTommygun = 17
 
-local AmBullets = surface.GetTextureID("vgui/serioussam/hud/AmBullets")
-local AmCannonBall = surface.GetTextureID("vgui/serioussam/hud/AmCannonBall")
-local AmElectricity = surface.GetTextureID("vgui/serioussam/hud/AmElectricity")
-local AmFuelReservoir = surface.GetTextureID("vgui/serioussam/hud/AmFuelReservoir")
-local AmGrenades = surface.GetTextureID("vgui/serioussam/hud/AmGrenades")
-local AmRockets = surface.GetTextureID("vgui/serioussam/hud/AmRockets")
-local AmShells = surface.GetTextureID("vgui/serioussam/hud/AmShells")
-local AmSniperBullets = surface.GetTextureID("vgui/serioussam/hud/AmSniperBullets")
+local AmBullets = 18
+local AmCannonBall = 19
+local AmElectricity = 20
+local AmFuelReservoir = 21
+local AmGrenades = 22
+local AmRockets = 23
+local AmShells = 24
+local AmSniperBullets = 25
+
+local hudicons = {
+	{
+		[HSuper] = surface.GetTextureID("vgui/serioussam/hud_tfe/HSuper"),
+		[ArMedium] = surface.GetTextureID("vgui/serioussam/hud_tfe/ArStrong"),
+
+		[WCannon] = surface.GetTextureID("vgui/serioussam/hud_tfe/WCannon"),
+		[WChainsaw] = surface.GetTextureID("vgui/serioussam/hud_tfe/WChainsaw"),
+		[WColt] = surface.GetTextureID("vgui/serioussam/hud_tfe/WColt"),
+		[WColtDual] = surface.GetTextureID("vgui/serioussam/hud_tfe/WColt"),
+		[WDoubleShotgun] = surface.GetTextureID("vgui/serioussam/hud_tfe/WDoubleShotgun"),
+		[WFlamer] = surface.GetTextureID("vgui/serioussam/hud_tfe/WFlamer"),
+		[WGhostBuster] = surface.GetTextureID("vgui/serioussam/hud_tfe/WGhostBuster"),
+		[WGrenadeLauncher] = surface.GetTextureID("vgui/serioussam/hud_tfe/WGrenadeLauncher"),
+		[WKnife] = surface.GetTextureID("vgui/serioussam/hud_tfe/WKnife"),
+		[WLaser] = surface.GetTextureID("vgui/serioussam/hud_tfe/WLaser"),
+		[WMinigun] = surface.GetTextureID("vgui/serioussam/hud_tfe/WMinigun"),
+		[WRocketLauncher] = surface.GetTextureID("vgui/serioussam/hud_tfe/WRocketLauncher"),
+		[WSingleShotgun] = surface.GetTextureID("vgui/serioussam/hud_tfe/WSingleShotgun"),
+		[WSniper] = surface.GetTextureID("vgui/serioussam/hud_tfe/WSniper"),
+		[WTommygun] = surface.GetTextureID("vgui/serioussam/hud_tfe/WTommygun"),
+
+		[AmBullets] = surface.GetTextureID("vgui/serioussam/hud_tfe/AmBullets"),
+		[AmCannonBall] = surface.GetTextureID("vgui/serioussam/hud_tfe/AmCannon"),
+		[AmElectricity] = surface.GetTextureID("vgui/serioussam/hud_tfe/AmElectricity"),
+		[AmFuelReservoir] = surface.GetTextureID("vgui/serioussam/hud_tfe/AmFuelReservoir"),
+		[AmGrenades] = surface.GetTextureID("vgui/serioussam/hud_tfe/AmGrenades"),
+		[AmRockets] = surface.GetTextureID("vgui/serioussam/hud_tfe/AmRockets"),
+		[AmShells] = surface.GetTextureID("vgui/serioussam/hud_tfe/AmShells"),
+		[AmSniperBullets] = surface.GetTextureID("vgui/serioussam/hud_tfe/AmSniperBullets")
+	},
+	{
+		[HSuper] = surface.GetTextureID("vgui/serioussam/hud/HSuper"),
+		[ArMedium] = surface.GetTextureID("vgui/serioussam/hud/ArMedium"),
+
+		[WCannon] = surface.GetTextureID("vgui/serioussam/hud/WCannon"),
+		[WChainsaw] = surface.GetTextureID("vgui/serioussam/hud/WChainsaw"),
+		[WColt] = surface.GetTextureID("vgui/serioussam/hud/WColt"),
+		[WColtDual] = surface.GetTextureID("vgui/serioussam/hud/WColtDual"),
+		[WDoubleShotgun] = surface.GetTextureID("vgui/serioussam/hud/WDoubleShotgun"),
+		[WFlamer] = surface.GetTextureID("vgui/serioussam/hud/WFlamer"),
+		[WGhostBuster] = surface.GetTextureID("vgui/serioussam/hud/WGhostBuster"),
+		[WGrenadeLauncher] = surface.GetTextureID("vgui/serioussam/hud/WGrenadeLauncher"),
+		[WKnife] = surface.GetTextureID("vgui/serioussam/hud/WKnife"),
+		[WLaser] = surface.GetTextureID("vgui/serioussam/hud/WLaser"),
+		[WMinigun] = surface.GetTextureID("vgui/serioussam/hud/WMinigun"),
+		[WRocketLauncher] = surface.GetTextureID("vgui/serioussam/hud/WRocketLauncher"),
+		[WSingleShotgun] = surface.GetTextureID("vgui/serioussam/hud/WSingleShotgun"),
+		[WSniper] = surface.GetTextureID("vgui/serioussam/hud/WSniper"),
+		[WTommygun] = surface.GetTextureID("vgui/serioussam/hud/WTommygun"),
+
+		[AmBullets] = surface.GetTextureID("vgui/serioussam/hud/AmBullets"),
+		[AmCannonBall] = surface.GetTextureID("vgui/serioussam/hud/AmCannonBall"),
+		[AmElectricity] = surface.GetTextureID("vgui/serioussam/hud/AmElectricity"),
+		[AmFuelReservoir] = surface.GetTextureID("vgui/serioussam/hud/AmFuelReservoir"),
+		[AmGrenades] = surface.GetTextureID("vgui/serioussam/hud/AmGrenades"),
+		[AmRockets] = surface.GetTextureID("vgui/serioussam/hud/AmRockets"),
+		[AmShells] = surface.GetTextureID("vgui/serioussam/hud/AmShells"),
+		[AmSniperBullets] = surface.GetTextureID("vgui/serioussam/hud/AmSniperBullets")
+	}
+}
 
 SeriousHUD.WeaponIcons = {
 	["weapon_ss_knife"] = WKnife,
@@ -136,24 +216,24 @@ local hl2weapons = {
 }
 
 local ammoicons = {
-	[7] = {icon = AmShells, maxammo = 100},
-	[4] = {icon = AmBullets, maxammo = 500},
-	[8] = {icon = AmRockets, maxammo = 50},
-	[10] = {icon = AmGrenades, maxammo = 50},
+	["Buckshot"] = {icon = AmShells, maxammo = 100},
+	["SMG1"] = {icon = AmBullets, maxammo = 500},
+	["RPG_Round"] = {icon = AmRockets, maxammo = 50},
+	["Grenade"] = {icon = AmGrenades, maxammo = 50},
 	["napalm"] = {icon = AmFuelReservoir, maxammo = 500},
-	["sniperround"] = {icon = AmSniperBullets, maxammo = 50},
-	[1] = {icon = AmElectricity, maxammo = 400},
+	["SniperRound"] = {icon = AmSniperBullets, maxammo = 50},
+	["AR2"] = {icon = AmElectricity, maxammo = 400},
 	["cannonball"] = {icon = AmCannonBall, maxammo = 30}
 }
 
 local ammoicons_list = {
-	[8] = 7,
-	[7] = 4,
-	[6] = 8,
-	[5] = 10,
+	[8] = "Buckshot",
+	[7] = "SMG1",
+	[6] = "RPG_Round",
+	[5] = "Grenade",
 	[4] = "napalm",
-	[3] = "sniperround",
-	[2] = 1,
+	[3] = "SniperRound",
+	[2] = "AR2",
 	[1] = "cannonball",
 }
 
@@ -177,6 +257,8 @@ local armor_jit_div = 2
 
 local jit_bound = 6
 local jit_speed = 100
+
+local col_update_speed = .75 -- how fast health/ammo numbers going to be white on change
 
 local function OnAmmoNumChange(ply, ammo)
 	if ammonum != ammo then
@@ -236,6 +318,8 @@ function SeriousHUD:Draw()
 		local client = LocalPlayer()
 		local awep = client:GetActiveWeapon()
 		
+		local icons = hudicons[SeriousHUD:GetSkin()]
+		
 		local size = ScrH() / 14.75 * SeriousHUD:GetHUDScale()
 		local gap_screen = ScrH() / 80
 		local gap_rect = 7
@@ -250,6 +334,11 @@ function SeriousHUD:Draw()
 		local ammoiconrectx = ammorectx + widerect_w + gap_rect
 		
 		local hudr, hudg, hudb = 90, 120, 180
+		local textr, textg, textb = 255, 230, 0
+		if SeriousHUD:GetSkin() == 1 then
+			hudr, hudg, hudb = SeriousHUD:GetColor()
+			textr, textg, textb = SeriousHUD:GetColor()
+		end
 		local rect, recta = 0, 160
 		
 		local armor = client:Alive() and client:Armor() or 0
@@ -274,33 +363,36 @@ function SeriousHUD:Draw()
 		
 		local hp = math.max(client:Health(), 0)
 
-		local hpcolr = 255
-		local hpcolg = 230
-		local hpcolb = 0
-		if hp > 100 then
-			hpcolr = 100
-			hpcolg = 255
-			hpcolb = 100
-		elseif hp <= 50 and hp > 25 then
-			hpcolg = 120
-		elseif hp <= 25 then
-			hpcolg = 0
+		local hpcolr, hpcolg, hpcolb = textr, textg, textb		
+		if SeriousHUD:GetSkin() == 1 then
+			if hp <= 20 then
+				hpcolr, hpcolg, hpcolb = 255, 0, 0
+			end
+		else
+			if hp <= 25 then
+				hpcolr, hpcolg, hpcolb = 255, 0, 0
+			elseif hp <= 50 then
+				hpcolr, hpcolg, hpcolb = 255, 120, 0
+			elseif hp > 100 then
+				hpcolr, hpcolg, hpcolb = 100, 255, 100
+			end
 		end
 
-		if math.min(RealTime() - healthchangetime + .75, 0) != 0 then
-			hpcolr = 255
-			hpcolg = 255
-			hpcolb = 255
+		if math.min(RealTime() - healthchangetime + col_update_speed, 0) != 0 then
+			hpcolr, hpcolg, hpcolb = 255, 255, 255
 		end
 		
-		local iccol = 255
-		
+		local hp_icon_r, hp_icon_g, hp_icon_b = 255, 255, 255
+		if SeriousHUD:GetSkin() == 1 then
+			hp_icon_r, hp_icon_g, hp_icon_b = SeriousHUD:GetColor()
+		end
+		local hp_icon_blink = 1		
 		if hp <= 10 then
-			iccol = math.max(math.sin(RealTime() * 12.5) * 4000, 40)
+			hp_icon_blink = SeriousHUD:GetBlinkColor() / 255
 		end
 		
-		surface.SetTexture(t_hearth)
-		surface.SetDrawColor(iccol, iccol, iccol, 255)
+		surface.SetTexture(icons[HSuper])
+		surface.SetDrawColor(hp_icon_r*hp_icon_blink, hp_icon_g*hp_icon_blink, hp_icon_b*hp_icon_blink, 255)
 		surface.DrawTexturedRect(gap_screen +health_jit_x, y +health_jit_y, size, size)	
 		
 		surface.SetFont("seriousHUDfont")
@@ -312,11 +404,15 @@ function SeriousHUD:Draw()
 		//armor
 		
 		if armor > 0 then
-			surface.SetTexture(ArMedium)
-			surface.SetDrawColor(255, 255, 255, 255)
+			local armor_icon_r, armor_icon_g, armor_icon_b = 255, 255, 255
+			if SeriousHUD:GetSkin() == 1 then
+				armor_icon_r, armor_icon_g, armor_icon_b = SeriousHUD:GetColor()
+			end
+			surface.SetTexture(icons[ArMedium])
+			surface.SetDrawColor(armor_icon_r, armor_icon_g, armor_icon_b, 255)
 			surface.DrawTexturedRect(gap_screen +armor_jit_x, armor_y +armor_jit_y, size, size)
 			local textsize_w, textsize_h = surface.GetTextSize(armor)
-			SeriousText(armor, (widerectleft_x) + (widerect_w - textsize_w) / 2, armor_y - text_align_y, Color(255, 230, 0, 255))
+			SeriousText(armor, (widerectleft_x) + (widerect_w - textsize_w) / 2, armor_y - text_align_y, Color(textr, textg, textb, 255))
 		end
 		OnArmorNumChange(client, armor)	
 		
@@ -343,18 +439,32 @@ function SeriousHUD:Draw()
 			
 			local wicn = SeriousHUD.WeaponIcons[class]
 			local hl2 = hl2weapons[class]
-			if wicn then		
-				surface.SetTexture(wicn)
-				surface.SetDrawColor(255, 255, 255, 255)
+			local wep_icon_r, wep_icon_g, wep_icon_b = 255, 255, 255
+			if SeriousHUD:GetSkin() == 1 then
+				wep_icon_r, wep_icon_g, wep_icon_b = SeriousHUD:GetColor()
+			end
+			if wicn then
+				surface.SetTexture(icons[wicn])
+				surface.SetDrawColor(wep_icon_r, wep_icon_g, wep_icon_b, 255)
 				surface.DrawTexturedRect(cntr +ammo_jit_x, y +ammo_jit_y, size, size)
-			elseif hl2 then		
-				draw.SimpleText(hl2, "seriousHUDfontHL2", cntr+size/2 +ammo_jit_x, y*1.05 +ammo_jit_y, Color(255, 230, 180, 255), TEXT_ALIGN_CENTER, 1)
-			end	
+			elseif hl2 then
+				if SeriousHUD:GetSkin() != 1 then
+					wep_icon_r, wep_icon_g, wep_icon_b = 255, 230, 180
+				end	
+				draw.SimpleText(hl2, "seriousHUDfontHL2", cntr+size/2 +ammo_jit_x, y*1.05 +ammo_jit_y, Color(wep_icon_r, wep_icon_g, wep_icon_b, 255), TEXT_ALIGN_CENTER, 1)
+			else
+				local icon = awep.WepIcon or awep.WepSelectIcon
+				if icon then
+					surface.SetTexture(icon)
+					surface.SetDrawColor(wep_icon_r, wep_icon_g, wep_icon_b, 255)
+					surface.DrawTexturedRect(cntr +ammo_jit_x, y +ammo_jit_y, size, size)
+				end
+			end
 			
 			local atype = awep:GetPrimaryAmmoType()
+			local atypeName = game.GetAmmoName(atype)
 			local anum = client:GetAmmoCount(atype)
 			local clipammo = awep:Clip1()
-			local ammotexture
 
 			local ammocount
 			if clipammo == -1 then
@@ -363,38 +473,61 @@ function SeriousHUD:Draw()
 				ammocount = clipammo + anum
 			end
 			
-			local ammonumcol = 230
-			local ammoiconcol = 255
-			local findammotype = awep:IsScripted() and ammoicons[awep.Primary.Ammo] or ammoicons[atype]
+			local ammo_text_r, ammo_text_g, ammo_text_b = textr, textg, textb
+			local ammo_icon_r, ammo_icon_g, ammo_icon_b = 255, 255, 255
+			if SeriousHUD:GetSkin() == 1 then
+				ammo_icon_r, ammo_icon_g, ammo_icon_b = SeriousHUD:GetColor()
+			end
+			local ammo_icon_blink = 1
+			local findammotype = ammoicons[atypeName]
 			if findammotype and awep:IsScripted() and (awep.Base == "weapon_ss_base" or awep.Base == "weapon_sshd_base") then
-				if ammocount <= math.ceil(findammotype.maxammo / 3.5) then
-					ammonumcol = 120
-				end
-				if ammocount <= math.ceil(findammotype.maxammo / 8) then
-					ammonumcol = 0
-				end
-				if ammocount <= math.floor(findammotype.maxammo / 15) then
-					ammoiconcol = math.max(math.sin(RealTime() *12.5) *4000, 40)
+				if SeriousHUD:GetSkin() == 1 then
+					if ammocount <= findammotype.maxammo / 5 then
+						ammo_text_r, ammo_text_g, ammo_text_b = 255, 0, 0
+					end
+					if ammocount <= findammotype.maxammo / 8 then
+						ammo_icon_blink = SeriousHUD:GetBlinkColor() / 255
+					end
+				else
+					if ammocount <= math.ceil(findammotype.maxammo / 3.5) then
+						ammo_text_r, ammo_text_g, ammo_text_b = 255, 120, 0
+					end
+					if ammocount <= math.ceil(findammotype.maxammo / 8) then
+						ammo_text_r, ammo_text_g, ammo_text_b = 255, 0, 0
+					end
+					if ammocount <= math.floor(findammotype.maxammo / 15) then
+						ammo_icon_blink = SeriousHUD:GetBlinkColor() / 255
+					end
 				end
 			end
 			if ammocount <= 0 then
-				ammonumcol = 0
-				ammoiconcol = math.max(math.sin(RealTime() *12.5) *4000, 40)
+				ammo_text_r, ammo_text_g, ammo_text_b = 255, 0, 0
+				ammo_icon_blink = SeriousHUD:GetBlinkColor() / 255
+			end
+			if SeriousHUD:GetSkin() == 1 then
+				if math.min(RealTime() - ammochangetime + col_update_speed, 0) != 0 then
+					ammo_text_r, ammo_text_g, ammo_text_b = 255, 255, 255
+				end
 			end
 			
 			if curammo != -1 then
 				surface.SetFont("seriousHUDfont")
 				local textsize_w, textsize_h = surface.GetTextSize(ammocount)
-				SeriousText(ammocount, ammorectx + (widerect_w - textsize_w) / 2, y - text_align_y, Color(255, ammonumcol, 0, 255))
+				SeriousText(ammocount, ammorectx + (widerect_w - textsize_w) / 2, y - text_align_y, Color(ammo_text_r, ammo_text_g, ammo_text_b, 255))
 				OnAmmoNumChange(client, ammocount)
 			else
 				ammo_jit_x = 0
 				ammo_jit_y = 0
 			end
 			
-			if findammotype then
-				surface.SetTexture(findammotype.icon)
-				surface.SetDrawColor(ammoiconcol, ammoiconcol, ammoiconcol, 255)
+			if curammo != -1 then
+				if findammotype then
+					surface.SetTexture(icons[findammotype.icon])
+					surface.SetDrawColor(ammo_icon_r*ammo_icon_blink, ammo_icon_g*ammo_icon_blink, ammo_icon_b*ammo_icon_blink, 255)
+				else
+					surface.SetTexture(icons[AmBullets])
+					surface.SetDrawColor(ammo_icon_r*ammo_icon_blink, ammo_icon_g*ammo_icon_blink, ammo_icon_b*ammo_icon_blink, 255)
+				end
 				surface.DrawTexturedRect(ammoiconrectx, y, size, size)
 			end
 		
@@ -406,6 +539,7 @@ function SeriousHUD:Draw()
 			local ammoy = y+ammosize/4
 			local icon_gap = 5.5
 			local iconpos = ScrW() - gap_screen + icon_gap + 1
+			local curammo = IsValid(awep) and awep:GetPrimaryAmmoType()
 			for k,v in ipairs(ammoicons_list) do
 				local ammoc = client:GetAmmoCount(v)
 				if ammoc > 0 then
@@ -416,19 +550,31 @@ function SeriousHUD:Draw()
 					surface.SetDrawColor(hudr, hudg, hudb, 255)
 					surface.DrawOutlinedRect(iconpos, ammoy+client:GetVar("ammo_icon_jit"..k, 0), ammosize, ammosize)
 					
-					surface.SetTexture(ammoicons[v].icon)
-					surface.SetDrawColor(255, 255, 255, 255)
-					surface.DrawTexturedRect(iconpos+2, ammoy+2+client:GetVar("ammo_icon_jit"..k, 0), ammosize/1.075, ammosize/1.075)
-					
-					local ammocolr, ammocolg, ammocolb = 255, math.min(ammosize / (ammoicons[v].maxammo / ammoc), ammosize), 0
-					local ammobar = ammocolg/1.125
-					if math.min(RealTime() -client:GetVar("ammochangetimeIcon"..k, 0)+.75, 0) != 0 then
-						ammocolr = 255
-						ammocolg = 255
-						ammocolb = 255
+					local ammodata = ammoicons[v]
+					if ammodata then
+						local icon_r, icon_g, icon_b = 255, 255, 255
+						if SeriousHUD:GetSkin() == 1 and curammo != game.GetAmmoID(v) then
+							icon_r, icon_g, icon_b = SeriousHUD:GetColor()
+						end
+						surface.SetTexture(icons[ammodata.icon])
+						surface.SetDrawColor(icon_r, icon_g, icon_b, 255)
+						surface.DrawTexturedRect(iconpos+2, ammoy+2+client:GetVar("ammo_icon_jit"..k, 0), ammosize/1.075, ammosize/1.075)
+						
+						local idk = math.min(ammosize / (ammodata.maxammo / ammoc), ammosize)
+						local ammobar = idk/1.125
+						local ammocolr, ammocolg, ammocolb = 255, idk*4.25, 0
+						if SeriousHUD:GetSkin() == 1 then
+							ammocolr, ammocolg, ammocolb = SeriousHUD:GetColor()
+							if ammoc <= ammodata.maxammo / 5 then
+								ammocolr, ammocolg, ammocolb = 255, 0, 0
+							end
+						end
+						if math.min(RealTime() -client:GetVar("ammochangetimeIcon"..k, 0)+col_update_speed, 0) != 0 then
+							ammocolr, ammocolg, ammocolb = 255, 255, 255
+						end
+						surface.SetDrawColor(ammocolr, ammocolg, ammocolb, 220)
+						surface.DrawRect(iconpos+ammosize/1.375, ammoy+ammosize/1.06-math.floor(ammobar)+client:GetVar("ammo_icon_jit"..k, 0), ammosize/4.75, ammobar)
 					end
-					surface.SetDrawColor(ammocolr, ammocolg*4.25, ammocolb, 220)
-					surface.DrawRect(iconpos+ammosize/1.375, ammoy+ammosize/1.06-math.floor(ammobar)+client:GetVar("ammo_icon_jit"..k, 0), ammosize/4.75, ammobar)
 				end
 			end
 		end
