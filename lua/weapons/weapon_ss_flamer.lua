@@ -12,7 +12,7 @@ if CLIENT then
 end
 
 function SWEP:SpecialDataTables()
-	self:NetworkVar("Float", 4, "AmmoDelay")
+	self:NetworkVar("Float", 5, "AmmoDelay")
 end
 
 function SWEP:PrimaryAttack()

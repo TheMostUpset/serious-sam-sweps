@@ -12,7 +12,7 @@ if CLIENT then
 end
 
 function SWEP:SpecialDataTables()
-	self:NetworkVar("Float", 4, "AnimDelay")
+	self:NetworkVar("Float", 5, "AnimDelay")
 end
 
 function SWEP:SpecialDeploy()

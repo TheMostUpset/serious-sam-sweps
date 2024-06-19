@@ -12,12 +12,16 @@ if CLIENT then
 end
 
 function SWEP:SpecialDataTables()
-	self:NetworkVar("Float", 4, "NextReload")
-	self:NetworkVar("Float", 5, "SecondReload")
+	self:NetworkVar("Float", 5, "NextReload")
+	self:NetworkVar("Float", 6, "SecondReload")
+end
+
+function SWEP:SpecialHolster()
+	self:SetNextReload(CurTime() + self.HolsterTime + .05)
 end
 
 function SWEP:PrimaryAttack()
-	if !self:CanPrimaryAttack() or self:GetHolster() then return end
+	if !self:CanPrimaryAttack() then return end
 	self:SendWeaponAnim(ACT_VM_PRIMARYATTACK)
 	self:WeaponSound(self.Primary.Sound)
 	self:Attack()
@@ -36,8 +40,8 @@ end
 
 function SWEP:Reload()
 	if self:Clip1() > 0 and CurTime() < self:GetNextReload() then return end
-	if self:Clip1() >= self.Primary.ClipSize or self:GetHolster() then return end
-	self.DisableHolster = CurTime() +1
+	if self:Clip1() >= self.Primary.ClipSize or self:GetHolster() or self:GetHolsterTime() > CurTime() then return end
+	self:HolsterDelay(CurTime() +1)
 	self:SendWeaponAnim(ACT_VM_RELOAD)
 	self.Owner:SetAnimation(PLAYER_RELOAD)
 	self:SetClip1(self.Primary.ClipSize)
@@ -47,6 +51,8 @@ function SWEP:Reload()
 end
 
 function SWEP:CanPrimaryAttack()
+	if self:GetHolster() or self:GetHolsterTime() > CurTime() then return false end
+
 	if self:Clip1() <= 0 then
 		self:SetNextPrimaryFire(CurTime() + .2)
 		self:Reload()

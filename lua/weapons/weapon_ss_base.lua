@@ -5,7 +5,6 @@ if SERVER then
 	SWEP.AutoSwitchTo		= false
 	SWEP.AutoSwitchFrom		= false
 	CreateConVar("ss_ammomultiplier", 3, FCVAR_ARCHIVE, "Multiplier for additional ammo on weapon pickup\n Any positive number, 0 - disabled")
-	CreateConVar("ss_enableholsterdelay", 1, FCVAR_ARCHIVE)
 
 else
 
@@ -19,6 +18,7 @@ else
 
 end
 
+local cvar_holsteranims = CreateConVar("ss_sv_holsteranims", 1, {FCVAR_ARCHIVE, FCVAR_REPLICATED})
 local cvar_unlimitedammo = CreateConVar("ss_unlimitedammo", 0, {FCVAR_NOTIFY, FCVAR_REPLICATED}, "Unlimited ammo for Serious Sam weapons", 0, 1)
 local cvar_dmrules = CreateConVar("ss_sv_dmrules", 0, {FCVAR_NOTIFY, FCVAR_REPLICATED}, "Deathmatch rules for Serious Sam weapons (damage values, fire rate, etc)", 0, 1)
 
@@ -51,24 +51,22 @@ SWEP.MuzzleScale			= 14
 SWEP.EnableSmoke			= false
 
 SWEP.DeployDelay			= 1.6
+SWEP.HolsterTime			= .4
 
 SWEP.EnableIdle				= false -- lua-based idle anim imitation (bad variable name actually)
 SWEP.UseHolsterAnim			= true
 
 SWEP.LaserPos				= false
 
-local SSAM_STATE_DEPLOY = 0
-local SSAM_STATE_HOLSTER = 1
-local SSAM_STATE_IDLE = 2
-
 function SWEP:SetupDataTables()
-	self:NetworkVar("Int", 0, "State")
+	self:NetworkVar("Entity", 0, "NewWeapon")
 	self:NetworkVar("Bool", 0, "Holster")
 	self:NetworkVar("Bool", 1, "Attack")
 	self:NetworkVar("Float", 0, "IdleDelay")
 	self:NetworkVar("Float", 1, "FidgetDelay")
 	self:NetworkVar("Float", 2, "AttackDelay")
 	self:NetworkVar("Float", 3, "HolsterTime")
+	self:NetworkVar("Float", 4, "DisableHolsterTime")
 	
 	self:NetworkVar("Bool", 2, "Zoom")
 	
@@ -88,7 +86,7 @@ function SWEP:Initialize()
 end
 
 function SWEP:OnRestore()
-	self.DisableHolster = nil
+	self:SetDisableHolsterTime(0)
 end
 
 function SWEP:Equip(ply)
@@ -101,12 +99,11 @@ function SWEP:Equip(ply)
 end
 
 function SWEP:Deploy()
-	self:SetState(SSAM_STATE_DEPLOY)
 	self:SendWeaponAnim(ACT_VM_DRAW)
 	self:IdleStuff()
 	self:HolsterDelay(CurTime())
 	self:SpecialDeploy()
-	self:SetHolster(nil)
+	self:SetHolster(false)
 	return true
 end
 
@@ -146,7 +143,7 @@ end
 
 function SWEP:HolsterDelay(time)
 	time = time or self:GetNextPrimaryFire() -.1
-	self.DisableHolster = time
+	self:SetDisableHolsterTime(time)
 end
 
 function SWEP:ResetBones()
@@ -158,60 +155,61 @@ function SWEP:OnRemove()
 	end
 end
 
-function SWEP:Holster(wep)
-	self:ResetBones()
-	
-	local disableHolster = self.DisableHolster and self.DisableHolster > CurTime()
+function SWEP:CanHolster()
+	return self:GetDisableHolsterTime() < CurTime()
+end
 
-	if !self.UseHolsterAnim or !cvars.Bool("ss_enableholsterdelay") then
-		if disableHolster then
+function SWEP:Holster(wep)
+	if self == wep then
+		return
+	end
+
+	self:ResetBones()
+
+	if !self.UseHolsterAnim or !cvar_holsteranims:GetBool() then
+		if !self:CanHolster() then
 			return false
 		else
-			self:SetState(SSAM_STATE_HOLSTER)
 			self:OnRemove()
 			return true
 		end
 		return
 	end
-
-	if self == wep then
-		return
+	
+	if IsValid(wep) then
+		if (self:GetClass() == "weapon_ss_colt" and wep:GetClass() == "weapon_ss_colt_dual") or (self:GetClass() == "weapon_ss_colt_dual" and wep:GetClass() == "weapon_ss_colt") then
+			if !self:CanHolster() then return false end
+			self:OnRemove()
+			return true
+		end
 	end
 	
-	if self:GetState() == SSAM_STATE_HOLSTER or !IsValid(wep) then
-		self:SetState(SSAM_STATE_HOLSTER)
-		self:OnRemove()
-		return true
-	end
-	
-	if self:GetHolster() then return false end
-	
-	if (self:GetClass() == "weapon_ss_colt" and wep:GetClass() == "weapon_ss_colt_dual") or (self:GetClass() == "weapon_ss_colt_dual" and wep:GetClass() == "weapon_ss_colt") then
-		if disableHolster then return false end
-		self:OnRemove()
-		return true
-	end
-	
-	if disableHolster then
+	if !self:CanHolster() then
 		if IsValid(wep) then
-			self.NewWeapon = wep:GetClass()
-			timer.Simple(.05, function()
-				if IsValid(self) and IsValid(self.Owner) and self.Owner:Alive() then
-					if SERVER then self.Owner:SelectWeapon(self.NewWeapon) end
-				end
-			end)
+			self:SetHolsterTime(self:GetDisableHolsterTime())
+			self:SetHolster(true)
+			self:SetNewWeapon(wep)
 		end
 		return false
 	end
+	
+	if self:GetHolster() or !IsValid(wep) then
+		self:OnRemove()
+		self:SetHolsterTime(0)
+		self:SetHolster(false)
+		self:SetNewWeapon(NULL)
+		return true
+	end
 
-	if IsValid(wep) then
-		self:SetIdleDelay(0)
-		self:SetHolster(true)
-		self:SetNextPrimaryFire(CurTime() + .4)
-		self:SendWeaponAnim(ACT_VM_HOLSTER)
-		self:SpecialHolster()
-		self.NewWeapon = wep:GetClass()
-		self:SetHolsterTime(CurTime() + .4)
+	if IsValid(wep) and !self:GetHolster() then
+		self:SetNewWeapon(wep)
+		if self:GetHolsterTime() < CurTime() then
+			self:SetIdleDelay(0)
+			self:SetNextPrimaryFire(CurTime() + self.HolsterTime + .05)
+			self:SendWeaponAnim(ACT_VM_HOLSTER)
+			self:SpecialHolster()
+			self:SetHolsterTime(CurTime() + self.HolsterTime)
+		end
 	end
 
 	return false
@@ -234,11 +232,26 @@ function SWEP:Think()
 	
 	local holsterTime = self:GetHolsterTime()
 	if holsterTime > 0 and holsterTime <= CurTime() then
-		if IsValid(self) and IsValid(self.Owner) and self.Owner:Alive() then
-			self:SetState(SSAM_STATE_HOLSTER)
-			if SERVER then self.Owner:SelectWeapon(self.NewWeapon) end
+		if IsValid(self) and IsValid(self.Owner) and self.Owner:Alive() and self.Owner:GetActiveWeapon() == self then
+			local wep = self:GetNewWeapon()
+			if self:GetHolster() then -- means we should finish something before holster
+				self:SetHolster(false)
+				if IsValid(wep) then
+					self:Holster(wep)
+				end
+			else
+				self:SetHolster(true)
+				if IsValid(wep) then
+					if game.SinglePlayer() then
+						self.Owner:SelectWeapon(wep:GetClass())
+					elseif CLIENT and IsFirstTimePredicted() then
+						input.SelectWeapon(wep)
+					end
+				end
+			end
+		else
+			self:SetHolsterTime(0)
 		end
-		self:SetHolsterTime(0)
 	end
 	
 	if !self.EnableIdle then
@@ -248,7 +261,6 @@ function SWEP:Think()
 			self:SetIdleDelay(0)
 			self:SetFidgetDelay(CurTime() + self:SequenceDuration() + math.random(10,12))
 			self:SendWeaponAnim(ACT_VM_IDLE)
-			self:SetState(SSAM_STATE_IDLE)
 		end		
 		if fidget > 0 and CurTime() > fidget then
 			self:SetFidgetDelay(0)
@@ -294,7 +306,7 @@ function SWEP:ShootBullet(dmg, numbul, cone)
 end
 
 function SWEP:CanPrimaryAttack()
-	if self:GetHolster() then return false end
+	if self:GetHolster() or self:GetHolsterTime() > CurTime() then return false end
 
 	if !self.Owner:IsNPC() then
 		if self.Owner:GetAmmoCount(self.Primary.Ammo) < self.AmmoToTake then

@@ -80,8 +80,8 @@ end
 end
 
 function SWEP:SpecialDataTables()
-	self:NetworkVar("Float", 4, "ZoomTime")
-	self:NetworkVar("Float", 5, "ZoomStart")
+	self:NetworkVar("Float", 5, "ZoomTime")
+	self:NetworkVar("Float", 6, "ZoomStart")
 end
 
 function SWEP:PrimaryAttack()	

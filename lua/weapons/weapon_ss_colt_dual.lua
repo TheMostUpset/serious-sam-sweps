@@ -26,7 +26,6 @@ function SWEP:Equip(ply)
 end
 
 function SWEP:Deploy()
-	self:SetState(0)
 	self:HolsterDelay(CurTime())
 	self:SetHolster(nil)
 	self:IdleStuff()
@@ -55,11 +54,13 @@ function SWEP:SpecialThink()
 	local att = self:GetAttackDelay()
 	if att > 0 and CurTime() > att then
 		self:SetAttackDelay(0)
-		self:Attack()
-		self:EmitSound(self.Primary.Sound, 100, 100)		
-		self:SendSecondWeaponAnim(ACT_VM_PRIMARYATTACK)
-		self:SeriousFlash(1)
-		self:IdleStuff()
+		if self:CanPrimaryAttack() then
+			self:Attack()
+			self:EmitSound(self.Primary.Sound, 100, 100)
+			self:SendSecondWeaponAnim(ACT_VM_PRIMARYATTACK)
+			self:SeriousFlash(1)
+			self:IdleStuff()
+		end
 	end
 	
 	local secReload = self:GetSecondReload()
@@ -103,9 +104,9 @@ end
 
 function SWEP:Reload()
 	if self:Clip1() > 0 and CurTime() < self:GetNextReload() then return end
-	if self:Clip1() >= self.Primary.ClipSize or self:GetHolster() then return end
+	if self:Clip1() >= self.Primary.ClipSize or self:GetHolster() or self:GetHolsterTime() > CurTime() then return end
 	self:SetIdleDelay(0)
-	self.DisableHolster = CurTime() +1.4
+	self:HolsterDelay(CurTime() +1.4)
 	self:SendWeaponAnim(ACT_VM_RELOAD)
 	self.Owner:SetAnimation(PLAYER_RELOAD)
 	self:SetClip1(self.Primary.ClipSize)
@@ -116,6 +117,7 @@ function SWEP:Reload()
 end
 
 function SWEP:SpecialHolster()
+	self:SetNextReload(CurTime() + self.HolsterTime + .05)
 	self:SendSecondWeaponAnim(ACT_VM_HOLSTER)
 end
 
