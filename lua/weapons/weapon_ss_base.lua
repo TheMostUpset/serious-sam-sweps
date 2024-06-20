@@ -155,6 +155,10 @@ function SWEP:OnRemove()
 	end
 end
 
+function SWEP:OnDrop()
+	self:OnRemove()
+end
+
 function SWEP:CanHolster()
 	return self:GetDisableHolsterTime() < CurTime()
 end
@@ -163,8 +167,6 @@ function SWEP:Holster(wep)
 	if self == wep then
 		return
 	end
-
-	self:ResetBones()
 
 	if !self.UseHolsterAnim or !cvar_holsteranims:GetBool() then
 		if !self:CanHolster() then
@@ -194,6 +196,10 @@ function SWEP:Holster(wep)
 	end
 	
 	if self:GetBeingHolster() and self:GetHolsterTime() <= CurTime() or !IsValid(wep) then
+		self:ResetBones()
+		if game.SinglePlayer() then
+			self:CallOnClient("ResetBones")
+		end
 		self:OnRemove()
 		self:SetHolsterTime(0)
 		self:SetBeingHolster(false)
@@ -270,9 +276,9 @@ function SWEP:Think()
 		self:EndSmokeThink()
 	end
 	
-	if !game.SinglePlayer() and self:GetBeingHolster() then
-		self:ResetBones()
-	end
+	-- if !game.SinglePlayer() and self:GetBeingHolster() then
+		-- self:ResetBones()
+	-- end
 end
 
 function SWEP:SpecialThink()

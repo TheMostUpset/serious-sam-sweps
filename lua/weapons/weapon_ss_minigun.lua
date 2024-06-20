@@ -9,6 +9,17 @@ if CLIENT then
 	SWEP.WepIcon			= "icons/serioussam/MiniGun"
 	killicon.Add("weapon_ss_minigun", SWEP.WepIcon, Color(255, 255, 255, 255))
 	
+	net.Receive("SS_Minigun_ResetBones", function()
+		local vm = LocalPlayer():GetViewModel()
+		if IsValid(vm) then
+			for i = 1, 2 do
+				vm:ManipulateBoneAngles(i, Angle(0, 0, 0))
+			end
+		end
+	end)
+	
+else
+	util.AddNetworkString("SS_Minigun_ResetBones")
 end
 
 function SWEP:SpecialDeploy()
@@ -80,15 +91,28 @@ function SWEP:SpecialThink()
 	end
 end
 
-function SWEP:ResetBones()
+function SWEP:ResetBones(sendToClient)
 	local owner = self.Owner
-	if CLIENT then
-		if IsValid(self) and IsValid(owner) and owner and owner:IsPlayer() then
+	if !IsValid(owner) then
+		owner = self.LastOwner
+	end
+	if IsValid(owner) and owner:IsPlayer() then
+		if CLIENT then
 			local vm = owner:GetViewModel()
 			if IsValid(vm) then
 				for i = 1, 2 do
 					vm:ManipulateBoneAngles(i, Angle(0, 0, 0))
 				end
+			end
+		elseif sendToClient then
+			if game.SinglePlayer() then
+				timer.Simple(.1, function()
+					net.Start("SS_Minigun_ResetBones")
+					net.Send(owner)
+				end)
+			else
+				net.Start("SS_Minigun_ResetBones")
+				net.Send(owner)
 			end
 		end
 	end
@@ -103,6 +127,17 @@ function SWEP:OnRemove()
 	self:SetAttack(nil)
 	self:ResetBones()
 	self.SmokeAmount = 0
+end
+
+function SWEP:OnDrop()
+	self:OnRemove()
+	self:ResetBones(true)
+end
+
+function SWEP:OwnerChanged()
+	if IsValid(self.Owner) and self.Owner:IsPlayer() then
+		self.LastOwner = self.Owner
+	end
 end
 
 local lastpos = 0
