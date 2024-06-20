@@ -45,22 +45,27 @@ function SWEP:PrimaryAttack()
 	end
 
 	if self:GetAttackDelay() >= self.BarrelAccelTime then
-		local delay, dmg, cone = self.Primary.Delay, self.Primary.Damage, self.Primary.Cone
-		if self:IsDeathmatchRules() then
-			delay, dmg, cone = self.Primary.DelayDM, self.Primary.DamageDM, self.Primary.ConeDM
-		end
-		self:SetNextPrimaryFire(CurTime() + delay)
-		self:SendWeaponAnim(ACT_VM_PRIMARYATTACK)
-		self.Owner:SetAnimation(PLAYER_ATTACK1)
-		self:PrimarySoundStart()
-		self:WeaponSound(self.Primary.Sound)
-		self:ShootBullet(dmg, self.Primary.NumShots, cone)
-		self:SeriousFlash()
-		self:TakeAmmo(self.AmmoToTake)
-		self:HolsterDelay(self:GetNextPrimaryFire())
-		if self.EnableEndSmoke then
-			self.SmokeAmount = self.SmokeAmount + 1
-		end
+		self:MinigunFire()
+	end
+end
+
+function SWEP:MinigunFire()
+	local delay, dmg, cone = self.Primary.Delay, self.Primary.Damage, self.Primary.Cone
+	if self:IsDeathmatchRules() then
+		delay, dmg, cone = self.Primary.DelayDM, self.Primary.DamageDM, self.Primary.ConeDM
+	end
+	self:SetNextPrimaryFire(CurTime() + delay)
+	self:SendWeaponAnim(ACT_VM_PRIMARYATTACK)
+	self.Owner:SetAnimation(PLAYER_ATTACK1)
+	self:PrimarySoundStart()
+	self:WeaponSound(self.Primary.Sound)
+	self:ShootBullet(dmg, self.Primary.NumShots, cone)
+	self:SeriousFlash()
+	self:TakeAmmo(self.AmmoToTake)
+	self:IdleStuff()
+	self:HolsterDelay(self:GetNextPrimaryFire())
+	if self.EnableEndSmoke then
+		self.SmokeAmount = self.SmokeAmount + 1
 	end
 end
 
