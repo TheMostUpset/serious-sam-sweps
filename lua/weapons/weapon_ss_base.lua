@@ -60,7 +60,7 @@ SWEP.LaserPos				= false
 
 function SWEP:SetupDataTables()
 	self:NetworkVar("Entity", 0, "NewWeapon")
-	self:NetworkVar("Bool", 0, "Holster")
+	self:NetworkVar("Bool", 0, "BeingHolster")
 	self:NetworkVar("Bool", 1, "Attack")
 	self:NetworkVar("Float", 0, "IdleDelay")
 	self:NetworkVar("Float", 1, "FidgetDelay")
@@ -103,7 +103,7 @@ function SWEP:Deploy()
 	self:IdleStuff()
 	self:HolsterDelay(CurTime())
 	self:SpecialDeploy()
-	self:SetHolster(false)
+	self:SetBeingHolster(false)
 	return true
 end
 
@@ -187,29 +187,28 @@ function SWEP:Holster(wep)
 	if !self:CanHolster() then
 		if IsValid(wep) then
 			self:SetHolsterTime(self:GetDisableHolsterTime())
-			self:SetHolster(true)
+			self:SetBeingHolster(false)
 			self:SetNewWeapon(wep)
 		end
 		return false
 	end
 	
-	if self:GetHolster() or !IsValid(wep) then
+	if self:GetBeingHolster() and self:GetHolsterTime() <= CurTime() or !IsValid(wep) then
 		self:OnRemove()
 		self:SetHolsterTime(0)
-		self:SetHolster(false)
+		self:SetBeingHolster(false)
 		self:SetNewWeapon(NULL)
 		return true
 	end
 
-	if IsValid(wep) and !self:GetHolster() then
+	if IsValid(wep) and !self:GetBeingHolster() then
 		self:SetNewWeapon(wep)
-		if self:GetHolsterTime() < CurTime() then
-			self:SetIdleDelay(0)
-			self:SetNextPrimaryFire(CurTime() + self.HolsterTime + .05)
-			self:SendWeaponAnim(ACT_VM_HOLSTER)
-			self:SpecialHolster()
-			self:SetHolsterTime(CurTime() + self.HolsterTime)
-		end
+		self:SetIdleDelay(0)
+		self:SetNextPrimaryFire(CurTime() + self.HolsterTime + .05)
+		self:SendWeaponAnim(ACT_VM_HOLSTER)
+		self:SpecialHolster()
+		self:SetBeingHolster(true)
+		self:SetHolsterTime(CurTime() + self.HolsterTime)
 	end
 
 	return false
@@ -234,14 +233,10 @@ function SWEP:Think()
 	if holsterTime > 0 and holsterTime <= CurTime() then
 		if IsValid(self) and IsValid(self.Owner) and self.Owner:Alive() and self.Owner:GetActiveWeapon() == self then
 			local wep = self:GetNewWeapon()
-			if self:GetHolster() then -- means we should finish something before holster
-				self:SetHolster(false)
-				if IsValid(wep) then
+			if IsValid(wep) then
+				if !self:GetBeingHolster() then -- means we should finish something before holster
 					self:Holster(wep)
-				end
-			else
-				self:SetHolster(true)
-				if IsValid(wep) then
+				else
 					if game.SinglePlayer() then
 						self.Owner:SelectWeapon(wep:GetClass())
 					elseif CLIENT and IsFirstTimePredicted() then
@@ -275,7 +270,7 @@ function SWEP:Think()
 		self:EndSmokeThink()
 	end
 	
-	if !game.SinglePlayer() and self:GetHolster() then
+	if !game.SinglePlayer() and self:GetBeingHolster() then
 		self:ResetBones()
 	end
 end
@@ -306,7 +301,7 @@ function SWEP:ShootBullet(dmg, numbul, cone)
 end
 
 function SWEP:CanPrimaryAttack()
-	if self:GetHolster() or self:GetHolsterTime() > CurTime() then return false end
+	if self:GetBeingHolster() or self:GetHolsterTime() > CurTime() then return false end
 
 	if !self.Owner:IsNPC() then
 		if self.Owner:GetAmmoCount(self.Primary.Ammo) < self.AmmoToTake then

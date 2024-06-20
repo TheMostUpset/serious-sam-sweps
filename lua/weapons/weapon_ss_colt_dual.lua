@@ -27,7 +27,7 @@ end
 
 function SWEP:Deploy()
 	self:HolsterDelay(CurTime())
-	self:SetHolster(nil)
+	self:SetBeingHolster(nil)
 	self:IdleStuff()
 
 	local vm = self.Owner:GetViewModel(1)
@@ -46,6 +46,7 @@ function SWEP:PrimaryAttack()
 	self:Attack()
 	self:SeriousFlash()
 	self:SetIdleDelay(0)
+	self:HolsterDelay(CurTime() +.2)
 end
 
 function SWEP:SpecialThink()	
@@ -104,7 +105,7 @@ end
 
 function SWEP:Reload()
 	if self:Clip1() > 0 and CurTime() < self:GetNextReload() then return end
-	if self:Clip1() >= self.Primary.ClipSize or self:GetHolster() or self:GetHolsterTime() > CurTime() then return end
+	if self:Clip1() >= self.Primary.ClipSize or self:GetBeingHolster() or self:GetHolsterTime() > CurTime() then return end
 	self:SetIdleDelay(0)
 	self:HolsterDelay(CurTime() +1.4)
 	self:SendWeaponAnim(ACT_VM_RELOAD)
