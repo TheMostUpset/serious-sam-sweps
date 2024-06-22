@@ -350,6 +350,15 @@ end
 function SeriousHUD:Draw()
 	if SeriousHUD:Enabled() then
 		local client = LocalPlayer()
+		local obstarget = LocalPlayer():GetObserverTarget()
+		local isSpectating = IsValid(obstarget)
+		if isSpectating then
+			client = obstarget
+		end
+		
+		local hud_color_r, hud_color_g, hud_color_b = SeriousHUD:GetColor()
+		local hud_skin = SeriousHUD:GetSkin()
+		
 		local awep = client:GetActiveWeapon()
 		
 		local icons = SeriousHUD:GetTexTable()
@@ -394,7 +403,7 @@ function SeriousHUD:Draw()
 		local hp = math.max(client:Health(), 0)
 
 		local hpcolr, hpcolg, hpcolb = textr, textg, textb		
-		if SeriousHUD:GetSkin() == 1 then
+		if hud_skin == 1 then
 			if hp <= 20 then
 				hpcolr, hpcolg, hpcolb = 255, 0, 0
 			end
@@ -412,7 +421,7 @@ function SeriousHUD:Draw()
 			hpcolr, hpcolg, hpcolb = 255, 255, 255
 		end
 		
-		local hp_icon_r, hp_icon_g, hp_icon_b = SeriousHUD:GetColor()
+		local hp_icon_r, hp_icon_g, hp_icon_b = hud_color_r, hud_color_g, hud_color_b
 		local hp_icon_blink = 1		
 		if hp <= 10 then
 			hp_icon_blink = SeriousHUD:GetBlinkColor() / 255
@@ -431,7 +440,7 @@ function SeriousHUD:Draw()
 		//armor
 		
 		if armor > 0 then
-			local armor_icon_r, armor_icon_g, armor_icon_b = SeriousHUD:GetColor()
+			local armor_icon_r, armor_icon_g, armor_icon_b = hud_color_r, hud_color_g, hud_color_b
 			surface.SetTexture(icons[ArMedium])
 			surface.SetDrawColor(armor_icon_r, armor_icon_g, armor_icon_b, 255)
 			surface.DrawTexturedRect(gap_screen +armor_jit_x, armor_y +armor_jit_y, size, size)
@@ -463,13 +472,13 @@ function SeriousHUD:Draw()
 			
 			local wicn = SeriousHUD.WeaponIcons[class]
 			local hl2 = hl2weapons[class]
-			local wep_icon_r, wep_icon_g, wep_icon_b = SeriousHUD:GetColor()
+			local wep_icon_r, wep_icon_g, wep_icon_b = hud_color_r, hud_color_g, hud_color_b
 			if wicn then
 				surface.SetTexture(icons[wicn])
 				surface.SetDrawColor(wep_icon_r, wep_icon_g, wep_icon_b, 255)
 				surface.DrawTexturedRect(cntr +ammo_jit_x, y +ammo_jit_y, size, size)
 			elseif hl2 then
-				if SeriousHUD:GetSkin() != 1 then
+				if hud_skin != 1 then
 					wep_icon_r, wep_icon_g, wep_icon_b = 255, 230, 180
 				end	
 				draw.SimpleText(hl2, "seriousHUDfontHL2", cntr+size/2 +ammo_jit_x, y*1.05 +ammo_jit_y, Color(wep_icon_r, wep_icon_g, wep_icon_b, 255), TEXT_ALIGN_CENTER, 1)
@@ -495,11 +504,11 @@ function SeriousHUD:Draw()
 			end
 			
 			local ammo_text_r, ammo_text_g, ammo_text_b = textr, textg, textb
-			local ammo_icon_r, ammo_icon_g, ammo_icon_b = SeriousHUD:GetColor()
+			local ammo_icon_r, ammo_icon_g, ammo_icon_b = hud_color_r, hud_color_g, hud_color_b
 			local ammo_icon_blink = 1
 			local findammotype = ammoicons[atypeName]
 			if findammotype and awep:IsScripted() and (awep.Base == "weapon_ss_base" or awep.Base == "weapon_sshd_base") then
-				if SeriousHUD:GetSkin() == 1 then
+				if hud_skin == 1 then
 					if ammocount <= findammotype.maxammo / 5 then
 						ammo_text_r, ammo_text_g, ammo_text_b = 255, 0, 0
 					end
@@ -522,7 +531,7 @@ function SeriousHUD:Draw()
 				ammo_text_r, ammo_text_g, ammo_text_b = 255, 0, 0
 				ammo_icon_blink = SeriousHUD:GetBlinkColor() / 255
 			end
-			if SeriousHUD:GetSkin() == 1 then
+			if hud_skin == 1 then
 				if math.min(RealTime() - ammochangetime + col_update_speed, 0) != 0 then
 					ammo_text_r, ammo_text_g, ammo_text_b = 255, 255, 255
 				end
@@ -570,8 +579,8 @@ function SeriousHUD:Draw()
 					
 					local ammodata = ammoicons[v]
 					if ammodata then
-						local icon_r, icon_g, icon_b = SeriousHUD:GetColor()
-						if SeriousHUD:GetSkin() == 1 and curammo == game.GetAmmoID(v) then
+						local icon_r, icon_g, icon_b = hud_color_r, hud_color_g, hud_color_b
+						if hud_skin == 1 and curammo == game.GetAmmoID(v) then
 							icon_r, icon_g, icon_b = 255, 255, 255
 						end
 						surface.SetTexture(icons[ammodata.icon])
@@ -581,8 +590,8 @@ function SeriousHUD:Draw()
 						local idk = math.min(ammosize / (ammodata.maxammo / ammoc), ammosize)
 						local ammobar = idk/1.125
 						local ammocolr, ammocolg, ammocolb = 255, idk*4.25, 0
-						if SeriousHUD:GetSkin() == 1 then
-							ammocolr, ammocolg, ammocolb = SeriousHUD:GetColor()
+						if hud_skin == 1 then
+							ammocolr, ammocolg, ammocolb = hud_color_r, hud_color_g, hud_color_b
 							if ammoc <= ammodata.maxammo / 5 then
 								ammocolr, ammocolg, ammocolb = 255, 0, 0
 							end
