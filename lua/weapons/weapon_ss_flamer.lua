@@ -88,7 +88,8 @@ function SWEP:DoFire(damage, igniteTime)
 	end
 	
 	if SERVER then
-		if tr.Hit and (IsValid(tr.Entity) or tr.HitWorld) then
+		if (!self.DamageDelay or self.DamageDelay <= CurTime()) and tr.Hit and (IsValid(tr.Entity) or tr.HitWorld) then
+			self.DamageDelay = CurTime() + .1
 			local hitTime = tr.StartPos:Distance(tr.HitPos)/768
 			timer.Simple(hitTime, function()
 				if !IsValid(self) or !IsValid(self.Owner) then return end
@@ -122,13 +123,16 @@ function SWEP:DoFire(damage, igniteTime)
 		end
 		if self.Owner:IsPlayer() then self.Owner:LagCompensation(false) end
 	end
-	
+	self:FireEffect(tr.HitPos)
+end
+
+function SWEP:FireEffect(hitpos)	
 	if IsFirstTimePredicted() then
 		local fx = EffectData()
 		fx:SetEntity(self)
 		fx:SetOrigin(self.Owner:GetShootPos())
 		fx:SetNormal(self.Owner:GetAimVector())
-		fx:SetStart(tr.HitPos)
+		fx:SetStart(hitpos)
 		fx:SetAngles(Angle(math.Rand(0,360), math.Rand(0,360), math.Rand(0,360)))
 		fx:SetAttachment(1)
 		util.Effect("ss_flamethrower", fx)
@@ -159,8 +163,14 @@ if SERVER then
 		-- if ent.SS_Flamer_ignite and dmginfo:GetAttacker():GetClass() == "entityflame" then
 			-- local data = ent.SS_Flamer_ignite
 			-- if data[3] > CurTime() then
-				-- dmginfo:SetAttacker(data[1])
-				-- dmginfo:SetInflictor(data[2])
+				-- local attacker = data[1]
+				-- local inflictor = data[2]
+				-- if IsValid(attacker) then
+					-- dmginfo:SetAttacker(attacker)
+				-- end
+				-- if IsValid(inflictor) then
+					-- dmginfo:SetInflictor(inflictor)
+				-- end
 			-- end
 		-- end
 	-- end)
