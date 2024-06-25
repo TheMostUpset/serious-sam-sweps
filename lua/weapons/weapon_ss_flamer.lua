@@ -103,6 +103,7 @@ function SWEP:DoFire(damage, igniteTime)
 				if IsValid(tr.Entity) and tr.Entity:WaterLevel() < 3 then
 					tr.Entity:TakeDamageInfo(dmginfo)
 					tr.Entity:Ignite(igniteTime)
+					tr.Entity.SS_Flamer_ignite = {attacker, self, CurTime() + igniteTime}
 				end
 				local ents = ents.FindInSphere(tr.HitPos, 32)
 				for k,v in pairs(ents) do
@@ -114,6 +115,7 @@ function SWEP:DoFire(damage, igniteTime)
 					if IsValid(trace.Entity) and trace.Entity == v and trace.Entity:WaterLevel() < 3 and self:IsCreature(trace.Entity) then
 						trace.Entity:Ignite(igniteTime)
 						trace.Entity:TakeDamageInfo(dmginfo)
+						trace.Entity.SS_Flamer_ignite = {attacker, self, CurTime() + igniteTime}
 					end
 				end
 			end)
@@ -152,6 +154,16 @@ if SERVER then
 	function SWEP:GetNPCRestTimes()
 		return 2, 5
 	end
+	
+	-- hook.Add("EntityTakeDamage", "SS_Flamer_SetFireOwner", function(ent, dmginfo)
+		-- if ent.SS_Flamer_ignite and dmginfo:GetAttacker():GetClass() == "entityflame" then
+			-- local data = ent.SS_Flamer_ignite
+			-- if data[3] > CurTime() then
+				-- dmginfo:SetAttacker(data[1])
+				-- dmginfo:SetInflictor(data[2])
+			-- end
+		-- end
+	-- end)
 	
 end
 
