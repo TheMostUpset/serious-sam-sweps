@@ -76,7 +76,9 @@ function ENT:Explode(exppos)
 	util.Decal("Scorch", trace.HitPos + trace.HitNormal, trace.HitPos - trace.HitNormal)
 	
 	self:EmitSound("weapons/serioussam/Explosion02.wav", 100, 100)
-	util.BlastDamage(self, self:GetOwner(), pos, 256, self.Damage)
+	local owner = self:GetOwner()
+	if !IsValid(owner) then owner = self end
+	util.BlastDamage(self, owner, pos, 256, self.Damage)
 	self:Remove()
 end
 
