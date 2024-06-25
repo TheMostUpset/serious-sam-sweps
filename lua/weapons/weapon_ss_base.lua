@@ -51,6 +51,7 @@ SWEP.MuzzleScale			= 14
 SWEP.EnableSmoke			= false
 
 SWEP.DeployDelay			= 1.6
+SWEP.DeployAnim				= ACT_VM_DRAW
 SWEP.HolsterTime			= .4
 
 SWEP.EnableIdle				= false -- lua-based idle anim imitation (bad variable name actually)
@@ -99,7 +100,7 @@ function SWEP:Equip(ply)
 end
 
 function SWEP:Deploy()
-	self:SendWeaponAnim(ACT_VM_DRAW)
+	self:SendWeaponAnim(self.DeployAnim)
 	self:IdleStuff()
 	self:HolsterDelay(CurTime())
 	self:SpecialDeploy()
@@ -178,14 +179,6 @@ function SWEP:Holster(wep)
 		return
 	end
 	
-	if IsValid(wep) then
-		if (self:GetClass() == "weapon_ss_colt" and wep:GetClass() == "weapon_ss_colt_dual") or (self:GetClass() == "weapon_ss_colt_dual" and wep:GetClass() == "weapon_ss_colt") then
-			if !self:CanHolster() then return false end
-			self:OnRemove()
-			return true
-		end
-	end
-	
 	if !self:CanHolster() then
 		if IsValid(wep) then
 			self:SetHolsterTime(self:GetDisableHolsterTime())
@@ -206,21 +199,25 @@ function SWEP:Holster(wep)
 		self:SetNewWeapon(NULL)
 		return true
 	end
-
+	
 	if IsValid(wep) and !self:GetBeingHolster() then
-		self:SetNewWeapon(wep)
-		self:SetIdleDelay(0)
-		self:SetNextPrimaryFire(CurTime() + self.HolsterTime + .05)
-		self:SendWeaponAnim(ACT_VM_HOLSTER)
-		self:SpecialHolster()
-		self:SetBeingHolster(true)
-		self:SetHolsterTime(CurTime() + self.HolsterTime)
+		self:DelayedHolster(wep)
 	end
 
 	return false
 end
 
 function SWEP:SpecialHolster()
+end
+
+function SWEP:DelayedHolster(wep)
+	self:SetNewWeapon(wep)
+	self:SetIdleDelay(0)
+	self:SetNextPrimaryFire(CurTime() + self.HolsterTime + .05)
+	self:SendWeaponAnim(ACT_VM_HOLSTER)
+	self:SpecialHolster()
+	self:SetBeingHolster(true)
+	self:SetHolsterTime(CurTime() + self.HolsterTime)
 end
 
 function SWEP:Think()
@@ -255,6 +252,21 @@ function SWEP:Think()
 		end
 	end
 	
+	self:IdleThink()
+	
+	if self.EnableEndSmoke then
+		self:EndSmokeThink()
+	end
+	
+	-- if !game.SinglePlayer() and self:GetBeingHolster() then
+		-- self:ResetBones()
+	-- end
+end
+
+function SWEP:SpecialThink()
+end
+
+function SWEP:IdleThink()
 	if !self.EnableIdle then
 		local idle = self:GetIdleDelay()
 		local fidget = self:GetFidgetDelay()
@@ -271,17 +283,6 @@ function SWEP:Think()
 			end
 		end
 	end
-	
-	if self.EnableEndSmoke then
-		self:EndSmokeThink()
-	end
-	
-	-- if !game.SinglePlayer() and self:GetBeingHolster() then
-		-- self:ResetBones()
-	-- end
-end
-
-function SWEP:SpecialThink()
 end
 
 function SWEP:EndSmokeThink()

@@ -25,17 +25,15 @@ function SWEP:Equip(ply)
 	ply:Give(self.Base)
 end
 
-function SWEP:Deploy()
-	self:HolsterDelay(CurTime())
-	self:SetBeingHolster(nil)
-	self:IdleStuff()
-
+function SWEP:SpecialDeploy()
+	self.DeployAnim = ACT_VM_DRAW
 	local vm = self.Owner:GetViewModel(1)
 	vm:SetWeaponModel(self.ViewModel, self)
-
-	self:SendWeaponAnim(ACT_VM_DRAW)
 	self:SendSecondWeaponAnim(ACT_VM_DRAW)
-	return true
+	self:SetDeploySpeed(self.DeployDelay)
+	
+	self:SetFidgetDelay(0)
+	self:SetIdleDelay(CurTime() + .1)
 end
 
 function SWEP:PrimaryAttack()
@@ -71,12 +69,14 @@ function SWEP:SpecialThink()
 		self:EmitSound(self.ReloadSound, 100, 100, 1, CHAN_AUTO)
 		self:IdleStuff()
 	end
-	
+end
+
+function SWEP:IdleThink()	
 	local idle = self:GetIdleDelay()
 	local fidget = self:GetFidgetDelay()
 	if idle > 0 and CurTime() > idle then
 		self:SetIdleDelay(0)
-		self:SetFidgetDelay(CurTime() +self:SequenceDuration() +math.random(10,12))
+		self:SetFidgetDelay(CurTime() + self:SequenceDuration() + math.random(10,12))
 		self:SendWeaponAnim(ACT_VM_IDLE)
 		self:SendSecondWeaponAnim(ACT_VM_IDLE)
 	end
@@ -86,7 +86,7 @@ function SWEP:SpecialThink()
 		if self:LookupSequence("idle2") == -1 then return end
 		self:SendWeaponAnim(ACT_VM_FIDGET)
 		self:SendSecondWeaponAnim(ACT_VM_FIDGET, 1, 1.0)
-		self:SetIdleDelay(CurTime() +self:SequenceDuration())
+		self:SetIdleDelay(CurTime() + self:SequenceDuration())
 	end
 end
 
@@ -117,16 +117,30 @@ function SWEP:Reload()
 	self:SetSecondReload(CurTime() + .6)
 end
 
-function SWEP:SpecialHolster()
-	self:SetNextReload(CurTime() + self.HolsterTime + .05)
+function SWEP:DelayedHolster(wep)
+	local hTime = self.HolsterTime
+	self:SetNewWeapon(wep)
+	self:SetIdleDelay(0)
+	if wep:GetClass() == self.Base then
+		hTime = .2
+		wep:SetClip1(self:Clip1() / 2)
+		wep.DeployAnim = ACT_VM_IDLE
+		wep:SetDeploySpeed(self.DeployDelayToSingle)
+	else
+		self:SendWeaponAnim(ACT_VM_HOLSTER)
+	end
+	self:SetNextPrimaryFire(CurTime() + hTime + .05)
+	self:SetNextReload(CurTime() + hTime + .05)
 	self:SendSecondWeaponAnim(ACT_VM_HOLSTER)
+	self:SetBeingHolster(true)
+	self:SetHolsterTime(CurTime() + hTime)
 end
 
 function SWEP:OnRemove()
 	self:SetAttackDelay(0)
 	if SERVER then
 		local owner = self:GetOwner()
-		if (owner && owner:IsValid() && owner:IsPlayer()) then
+		if owner and IsValid(owner) and owner:IsPlayer() then
 			local vm = owner:GetViewModel(1)
 			if IsValid(vm) then
 				vm:SetWeaponModel(self.ViewModel, nil)

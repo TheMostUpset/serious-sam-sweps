@@ -16,8 +16,27 @@ function SWEP:SpecialDataTables()
 	self:NetworkVar("Float", 6, "SecondReload")
 end
 
-function SWEP:SpecialHolster()
-	self:SetNextReload(CurTime() + self.HolsterTime + .05)
+function SWEP:SpecialDeploy()
+	self.DeployAnim = ACT_VM_DRAW
+	self:SetDeploySpeed(self.DeployDelay)
+end
+
+function SWEP:DelayedHolster(wep)
+	local hTime = self.HolsterTime
+	self:SetNewWeapon(wep)
+	self:SetIdleDelay(0)
+	if wep:GetClass() == self:GetClass().."_dual" then
+		hTime = 0
+		wep:SetClip1(self:Clip1() * 2)
+		wep.DeployAnim = ACT_VM_IDLE
+		wep:SetDeploySpeed(self.DeployDelayToDual)
+	else
+		self:SendWeaponAnim(ACT_VM_HOLSTER)
+	end
+	self:SetNextPrimaryFire(CurTime() + hTime + .05)
+	self:SetNextReload(CurTime() + hTime + .05)
+	self:SetBeingHolster(true)
+	self:SetHolsterTime(CurTime() + hTime)
 end
 
 function SWEP:PrimaryAttack()
@@ -86,3 +105,5 @@ SWEP.Primary.DefaultClip	= 6
 SWEP.ReloadSound			= "weapons/serioussam/colt/Reload.wav"
 
 SWEP.DeployDelay			= 1.9
+SWEP.DeployDelayToDual		= 3
+SWEP.DeployDelayToSingle	= 14
