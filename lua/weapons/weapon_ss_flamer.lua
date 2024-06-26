@@ -67,7 +67,7 @@ end
 
 function SWEP:DoFire(damage, igniteTime)
 	damage = damage or self.Primary.Damage
-	igniteTime = igniteTime or 7
+	igniteTime = igniteTime or 5.9
 	
 	if SERVER and self.Owner:IsPlayer() then self.Owner:LagCompensation(true) end
 	
@@ -189,7 +189,7 @@ SWEP.ViewModel			= "models/weapons/serioussam/v_flamer.mdl"
 SWEP.WorldModel			= "models/weapons/serioussam/w_flamer.mdl"
 
 SWEP.Primary.Sound			= Sound("weapons/serioussam/flamer/Fire.wav")
-SWEP.Primary.Damage			= 10
+SWEP.Primary.Damage			= 8
 SWEP.Primary.Delay			= .03
 SWEP.Primary.DefaultClip	= 100
 SWEP.Primary.Ammo			= "napalm"
