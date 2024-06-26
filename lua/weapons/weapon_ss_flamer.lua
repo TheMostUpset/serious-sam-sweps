@@ -89,7 +89,7 @@ function SWEP:DoFire(damage, igniteTime)
 	
 	if SERVER then
 		if (!self.DamageDelay or self.DamageDelay <= CurTime()) and tr.Hit and (IsValid(tr.Entity) or tr.HitWorld) then
-			self.DamageDelay = CurTime() + .1
+			self.DamageDelay = CurTime() + .075
 			local hitTime = tr.StartPos:Distance(tr.HitPos)/768
 			timer.Simple(hitTime, function()
 				if !IsValid(self) or !IsValid(self.Owner) then return end
