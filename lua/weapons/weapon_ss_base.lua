@@ -569,13 +569,13 @@ function SWEP:CalcViewModelView(vm, oldpos, oldang, pos, ang)
 		if modelindex == 0 and (game.SinglePlayer() or IsFirstTimePredicted()) then -- don't call calculations more than once
 			local vertVel = ownerVelocity[3]
 			if vertVel < 0 then
-				vertOffset = math.max(vertVel * .005, -.3)
+				vertOffset = math.max(vertVel * .004, -.3)
 				vertOffsetSinTime = 0
-				vertOffsetSinMul = math.min(vertVel * -.00075, .4) -- TODO: change value based on correct jump height
+				vertOffsetSinMul = math.min(vertVel * -.0007, .7)
 			elseif vertOffsetSinMul > .0001 then
 				local FT = FrameTime()
 				if FT > 0 then
-					vertOffsetSinTime = vertOffsetSinTime + FT * 10
+					vertOffsetSinTime = vertOffsetSinTime + FT * 11
 					vertOffsetSinMul = Lerp(FT*5, vertOffsetSinMul, 0)
 					vertOffset = Lerp(FT*16, vertOffset, 0) + math.sin(vertOffsetSinTime) * vertOffsetSinMul * FT*100
 				end

@@ -106,4 +106,4 @@ SWEP.ReloadSound			= "weapons/serioussam/colt/Reload.wav"
 
 SWEP.DeployDelay			= 1.9
 SWEP.DeployDelayToDual		= 3
-SWEP.DeployDelayToSingle	= 14
+SWEP.DeployDelayToSingle	= 13
