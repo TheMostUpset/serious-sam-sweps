@@ -33,7 +33,8 @@ function SWEP:SpecialDeploy()
 	self:SetDeploySpeed(self.DeployDelay)
 	
 	self:SetFidgetDelay(0)
-	self:SetIdleDelay(CurTime() + .1)
+	local seq = vm:SelectWeightedSequence(ACT_VM_DRAW)
+	self:SetIdleDelay(CurTime() + self:SequenceDuration(seq))
 end
 
 function SWEP:PrimaryAttack()
