@@ -17,6 +17,10 @@ function SeriousHUD:AmmoIconsEnabled()
 	return cvar_ammoicons:GetBool()
 end
 
+function SeriousHUD:DrawAmmo()
+	return true
+end
+
 function SeriousHUD:GetHUDScale()
 	return 1
 end
@@ -451,7 +455,7 @@ function SeriousHUD:Draw()
 		
 		//ammo
 		
-		if awep != NULL then
+		if awep != NULL and SeriousHUD:DrawAmmo() then
 		
 			local curammo = awep:GetPrimaryAmmoType()
 			
