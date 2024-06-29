@@ -9,6 +9,9 @@ if CLIENT then
 	SWEP.WepIcon			= "icons/serioussam/Laser"
 	killicon.Add("weapon_ss_laser", SWEP.WepIcon, Color(255, 255, 255, 255))
 	killicon.Add("ss_laser", SWEP.WepIcon, Color(255, 255, 255, 255))
+
+	SWEP.AngleUp			= 4.5
+	SWEP.FakeFireAnim		= {[0] = true, [1] = true, [2] = true, [3] = true}
 	
 end
 
@@ -117,7 +120,5 @@ SWEP.Primary.DefaultClip	= 50
 SWEP.Primary.Ammo			= "ar2"
 SWEP.EntityProjectile		= "ss_laser"
 SWEP.ProjectileSpeed		= 3500 -- max source engine speed?
-
-SWEP.LaserPos				= true
 
 SWEP.DeployDelay			= .9

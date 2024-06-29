@@ -57,8 +57,6 @@ SWEP.HolsterTime			= .4
 SWEP.EnableIdle				= false -- lua-based idle anim imitation (bad variable name actually)
 SWEP.UseHolsterAnim			= true
 
-SWEP.LaserPos				= false
-
 function SWEP:SetupDataTables()
 	self:NetworkVar("Entity", 0, "NewWeapon")
 	self:NetworkVar("Bool", 0, "BeingHolster")
@@ -589,18 +587,21 @@ function SWEP:CalcViewModelView(vm, oldpos, oldang, pos, ang)
 		pos = pos + math.sin(CurTime() * breathSpeed) * ang:Up() / breathWeakness
 	end
 	
-	if self.LaserPos then
+	if self.FakeFireAnim then
 		local firetime = CurTime() - self:GetNextPrimaryFire()
 		local seq = self:GetSequence()
 		if game.SinglePlayer() or IsFirstTimePredicted() then
 			local FT = FrameTime()
-			if firetime <= FT - .09 and self:Ammo1() > 0 and (seq == 0 or seq == 1 or seq == 2 or seq == 3) then
+			if firetime <= FT - .09 and self:Ammo1() > 0 and self.FakeFireAnim[seq] then
 				laseranim = math.Approach(laseranim, .75, FT * 60)
 			end
 			laseranim = Lerp(FT * 20, laseranim, .0001)
 		end
 		pos = pos - laseranim * ang:Forward()
-		ang:RotateAroundAxis(ang:Right(), 4.5)
+	end
+	
+	if self.AngleUp then
+		ang:RotateAroundAxis(ang:Right(), self.AngleUp)
 	end
 	
 	if self:GetZoom() then

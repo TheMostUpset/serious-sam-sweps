@@ -484,7 +484,7 @@ function SeriousHUD:Draw()
 				draw.SimpleText(hl2, "seriousHUDfontHL2", cntr+size/2 +ammo_jit_x, y*1.05 +ammo_jit_y, Color(wep_icon_r, wep_icon_g, wep_icon_b, 255), TEXT_ALIGN_CENTER, 1)
 			else
 				local icon = awep.WepIcon or awep.WepSelectIcon
-				if icon then
+				if icon and isnumber(icon) then
 					surface.SetTexture(icon)
 					surface.SetDrawColor(wep_icon_r, wep_icon_g, wep_icon_b, 255)
 					surface.DrawTexturedRect(cntr +ammo_jit_x, y +ammo_jit_y, size, size)
