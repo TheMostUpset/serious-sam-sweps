@@ -110,19 +110,20 @@ function SWEP:ViewModelDrawn(vm)
 	local width = 2
 	local size = 3
 	local move = CurTime() * 4
+	local col = Color(255, 255, 255, 255)
 	
 	render.SetMaterial(mat)
 	for i = -2, 2 do
-		render.DrawBeam(pos + up * size, pos - right * size, width, move, move-i, Color(255, 255, 255, 255))
-		render.DrawBeam(pos + up * size, pos + right * size, width, move, move+i, Color(255, 255, 255, 255))
-		render.DrawBeam(pos + right * size, pos - up * size, width, move, move+i, Color(255, 255, 255, 255))
-		render.DrawBeam(pos - up * size, pos - right * size, width, move, move+i, Color(255, 255, 255, 255))
+		render.DrawBeam(pos + up * size, pos - right * size, width, move, move-i, col)
+		render.DrawBeam(pos + up * size, pos + right * size, width, move, move+i, col)
+		render.DrawBeam(pos + right * size, pos - up * size, width, move, move+i, col)
+		render.DrawBeam(pos - up * size, pos - right * size, width, move, move+i, col)
 	end
 	render.SetMaterial(flare)
-	render.DrawBeam(pos + up * size, pos - right * size, width, 0, 1, Color(255, 255, 255, 255))
-	render.DrawBeam(pos + up * size, pos + right * size, width, 0, 1, Color(255, 255, 255, 255))
-	render.DrawBeam(pos + right * size, pos - up * size, width, 0, 1, Color(255, 255, 255, 255))
-	render.DrawBeam(pos - up * size, pos - right * size, width, 0, 1, Color(255, 255, 255, 255))	
+	render.DrawBeam(pos + up * size, pos - right * size, width, 0, 1, col)
+	render.DrawBeam(pos + up * size, pos + right * size, width, 0, 1, col)
+	render.DrawBeam(pos + right * size, pos - up * size, width, 0, 1, col)
+	render.DrawBeam(pos - up * size, pos - right * size, width, 0, 1, col)	
 end
 
 SWEP.HoldType			= "crossbow"
