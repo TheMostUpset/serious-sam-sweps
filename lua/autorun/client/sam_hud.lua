@@ -25,6 +25,10 @@ function SeriousHUD:GetHUDScale()
 	return 1
 end
 
+-- function SeriousHUD:GetTransparency()
+	-- return 100
+-- end
+
 function SeriousHUD:GetSkin()
 	return cvar_skin:GetInt()
 end
@@ -362,6 +366,7 @@ function SeriousHUD:Draw()
 		
 		local hud_color_r, hud_color_g, hud_color_b = SeriousHUD:GetColor()
 		local hud_skin = SeriousHUD:GetSkin()
+		-- local hud_alpha = SeriousHUD:GetTransparency() * 2.55
 		
 		local awep = client:GetActiveWeapon()
 		
