@@ -12,6 +12,7 @@ if CLIENT then
 end
 
 function SWEP:PrimaryAttack()
+	if !self:CanUseWeapon() then return end
 	self:SetNextPrimaryFire(CurTime() + self.Primary.Delay)
 	self:Melee()
 	self:SendWeaponAnim(ACT_VM_HITCENTER)

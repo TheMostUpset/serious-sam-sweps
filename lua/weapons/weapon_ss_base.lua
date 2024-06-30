@@ -192,7 +192,7 @@ function SWEP:Holster(wep)
 			self:CallOnClient("ResetBones")
 		end
 		self:OnRemove()
-		self:SetHolsterTime(0)
+		-- self:SetHolsterTime(0)
 		self:SetBeingHolster(false)
 		self:SetNewWeapon(NULL)
 		return true
@@ -211,7 +211,7 @@ end
 function SWEP:DelayedHolster(wep)
 	self:SetNewWeapon(wep)
 	self:SetIdleDelay(0)
-	self:SetNextPrimaryFire(CurTime() + self.HolsterTime + .05)
+	-- self:SetNextPrimaryFire(CurTime() + self.HolsterTime + .05)
 	self:SendWeaponAnim(ACT_VM_HOLSTER)
 	self:SpecialHolster()
 	self:SetBeingHolster(true)
@@ -305,8 +305,12 @@ function SWEP:ShootBullet(dmg, numbul, cone)
 	self.Owner:FireBullets(bullet)
 end
 
+function SWEP:CanUseWeapon()
+	return !self:GetBeingHolster() and self:GetHolsterTime() + .015 < CurTime()
+end
+
 function SWEP:CanPrimaryAttack()
-	if self:GetBeingHolster() or self:GetHolsterTime() > CurTime() then return false end
+	if !self:CanUseWeapon() then return false end
 
 	if !self.Owner:IsNPC() then
 		if self.Owner:GetAmmoCount(self.Primary.Ammo) < self.AmmoToTake then

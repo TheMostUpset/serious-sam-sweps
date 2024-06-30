@@ -21,6 +21,7 @@ function SWEP:SpecialDeploy()
 end
 
 function SWEP:PrimaryAttack()
+	if !self:CanUseWeapon() then return end
 	if !self:GetAttack() then
 		self:SetAttack(true)
 		self:SetNextPrimaryFire(CurTime() + .2)

@@ -33,8 +33,8 @@ function SWEP:DelayedHolster(wep)
 	else
 		self:SendWeaponAnim(ACT_VM_HOLSTER)
 	end
-	self:SetNextPrimaryFire(CurTime() + hTime + .05)
-	self:SetNextReload(CurTime() + hTime + .05)
+	-- self:SetNextPrimaryFire(CurTime() + hTime + .05)
+	-- self:SetNextReload(CurTime() + hTime + .05)
 	self:SetBeingHolster(true)
 	self:SetHolsterTime(CurTime() + hTime)
 end
@@ -59,7 +59,7 @@ end
 
 function SWEP:Reload()
 	if self:Clip1() > 0 and CurTime() < self:GetNextReload() then return end
-	if self:Clip1() >= self.Primary.ClipSize or self:GetBeingHolster() or self:GetHolsterTime() > CurTime() then return end
+	if self:Clip1() >= self.Primary.ClipSize or !self:CanUseWeapon() then return end
 	self:HolsterDelay(CurTime() +1)
 	self:SendWeaponAnim(ACT_VM_RELOAD)
 	self.Owner:SetAnimation(PLAYER_RELOAD)
@@ -70,7 +70,7 @@ function SWEP:Reload()
 end
 
 function SWEP:CanPrimaryAttack()
-	if self:GetBeingHolster() or self:GetHolsterTime() > CurTime() then return false end
+	if !self:CanUseWeapon() then return false end
 
 	if self:Clip1() <= 0 then
 		self:SetNextPrimaryFire(CurTime() + .2)

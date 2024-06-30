@@ -115,6 +115,7 @@ function SWEP:OnRemove()
 end
 
 function SWEP:SecondaryAttack()
+	if !self:CanUseWeapon() then return end
 	if !self:GetZoom() then
 		self:SetZoom(true)
 		self:SetZoomTime(1)
