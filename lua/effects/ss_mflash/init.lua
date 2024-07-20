@@ -48,8 +48,8 @@ function EFFECT:Init(data)
 	self.Size = data:GetScale()
 	self.Rotate = math.Rand(0, 180)
 	
-	local lightpos = self:GetMuzzleFlashPos(self.Position, self.WeaponEnt, self.Attachment, self.ModelIndex)
 	if !cvars.Bool("ss_firelight") then return end
+	local lightpos = self:GetMuzzleFlashPos(self.Position, self.WeaponEnt, self.Attachment, self.ModelIndex)
 	local dynlight = DynamicLight(self:EntIndex())
 		dynlight.Pos = lightpos
 		dynlight.Size = 64
