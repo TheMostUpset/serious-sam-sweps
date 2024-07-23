@@ -86,6 +86,11 @@ local pickupamount = 0
 local pickuptextTime = RealTime()
 net.Receive("SSPickupText", function()
 	local msg, amount = net.ReadString(), net.ReadUInt(8)
+	SeriousHUD:ReceivePickupText(msg, amount)
+end)
+
+function SeriousHUD:ReceivePickupText(msg, amount)
+	amount = amount or 0
 	
 	if (pickuptextTime and pickuptextTime < RealTime()) or pickuptext != msg then
 		pickupamount = 0
@@ -96,7 +101,8 @@ net.Receive("SSPickupText", function()
 		pickupamount = pickupamount + amount
 	end
 	pickuptextTime = RealTime() + 2
-end)
+end
+
 function SeriousHUD:DrawPickupText()
 	if pickuptext and pickuptextTime and pickuptextTime > RealTime() then
 		local text = pickupamount > 0 and pickuptext.." +".. pickupamount or pickuptext
