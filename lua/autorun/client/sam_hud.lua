@@ -106,10 +106,14 @@ end
 function SeriousHUD:DrawPickupText()
 	if pickuptext and pickuptextTime and pickuptextTime > RealTime() then
 		local text = pickupamount > 0 and pickuptext.." +".. pickupamount or pickuptext
-		draw.SimpleText(text, "seriousHUDpickuptext", ScrW() / 2 + 1, ScrH() / 1.24 + 1, Color(0, 0, 0, 255), TEXT_ALIGN_CENTER)
-		draw.SimpleText(text, "seriousHUDpickuptext", ScrW() / 2 + 2, ScrH() / 1.24 + 2, Color(0, 0, 0, 100), TEXT_ALIGN_CENTER)
-		draw.SimpleText(text, "seriousHUDpickuptext", ScrW() / 2, ScrH() / 1.24, Color(255, 255, 255, 255), TEXT_ALIGN_CENTER)
+		self:DrawPickupTextSeriously(text, "seriousHUDpickuptext", ScrW() / 2, ScrH() / 1.24)
 	end
+end
+
+function SeriousHUD:DrawPickupTextSeriously(text, font, x, y)
+	draw.SimpleText(text, font, x + 1, y + 1, Color(0, 0, 0, 255), TEXT_ALIGN_CENTER)
+	draw.SimpleText(text, font, x + 2, y + 2, Color(0, 0, 0, 100), TEXT_ALIGN_CENTER)
+	draw.SimpleText(text, font, x, y, Color(255, 255, 255, 255), TEXT_ALIGN_CENTER)
 end
 
 local HSuper = 1
