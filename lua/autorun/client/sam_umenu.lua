@@ -19,3 +19,5 @@ local function SS_PopulateToolMenu()
 end
 
 hook.Add("PopulateToolMenu", "SS_PopulateToolMenu", SS_PopulateToolMenu)
+
+list.Set("ContentCategoryIcons", "Serious Sam", "vgui/serioussam_16.png")
