@@ -3,6 +3,8 @@ AddCSLuaFile("shared.lua")
 include("shared.lua")
 
 ENT.Model = Model("models/projectiles/serioussam/grenade.mdl")
+ENT.ExplodeOnWallHit = true -- enable explosion on wall hit
+ENT.ExplodeOnWallHitSpeed = 1000 -- min speed to explode at wall
 
 function ENT:Initialize()
 	self:SetModel(self.Model)
@@ -10,7 +12,7 @@ function ENT:Initialize()
 	self:SetMoveType(MOVETYPE_VPHYSICS)
 	self:SetSolid(SOLID_VPHYSICS)
 	local phys = self:GetPhysicsObject()
-	if (phys:IsValid()) then
+	if phys:IsValid() then
 		phys:SetMass(5)
 		phys:Wake()
 		phys:AddAngleVelocity(Vector(math.random(-1,1) *300,-200,0))
@@ -18,7 +20,7 @@ function ENT:Initialize()
 end
 
 function ENT:SetExplodeDelay(flDelay)
-	self.delayExplode = CurTime() +flDelay
+	self.delayExplode = CurTime() + flDelay
 end
 
 function ENT:SetDamage(dmg)
@@ -27,12 +29,15 @@ end
 
 ENT.HitNormal = Vector(0,0,0)
 
-function ENT:PhysicsCollide(data,phys)
-	if data.DeltaTime > 0.05 then self:EmitSound("weapons/serioussam/grenadelauncher/Bounce.wav") end
-	local impulse = -data.Speed * data.HitNormal * 1.5
-	phys:ApplyForceCenter(impulse)
-	
+function ENT:PhysicsCollide(data, phys)
 	self.HitNormal = data.HitNormal
+	if self.ExplodeOnWallHit and data.Speed >= self.ExplodeOnWallHitSpeed then
+		self:Explode()
+	else
+		if data.DeltaTime > 0.05 then self:EmitSound("weapons/serioussam/grenadelauncher/Bounce.wav") end
+		local impulse = -data.Speed * data.HitNormal * 1.5
+		phys:ApplyForceCenter(impulse)
+	end
 end
 
 function ENT:Think()
@@ -69,6 +74,8 @@ function ENT:Explode(exppos)
 	})
 	
 	pos = tr.HitPos
+	
+	self.delayExplode = nil
 
 	self:ExplosionEffects(pos, self.HitNormal:Angle())
 	
@@ -83,7 +90,7 @@ function ENT:Explode(exppos)
 end
 
 function ENT:StartTouch(ent)
-	if (ent:IsValid() and ent:IsPlayer() or ent:IsNPC() or ent:Health() > 0) then
+	if ent:IsValid() and ent:IsPlayer() or ent:IsNPC() or ent:Health() > 0 then
  		self:Explode(ent:GetPos())
 	end
 end
