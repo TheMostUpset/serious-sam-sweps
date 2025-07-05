@@ -1,5 +1,5 @@
 
-function EFFECT:Init(data)	
+function EFFECT:Init(data)
 	if !cvars.Bool("ss_firelight") then return end
 	local dynlight = DynamicLight(self:EntIndex())
 		dynlight.Pos = data:GetOrigin()

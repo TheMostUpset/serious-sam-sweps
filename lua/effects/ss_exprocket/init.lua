@@ -7,6 +7,17 @@ function EFFECT:Init(data)
 	
 	self.Size = 256
 	self.Pos = data:GetOrigin()
+	
+	-- if !cvars.Bool("ss_firelight") then return end
+	-- local dynlight = DynamicLight(self:EntIndex())
+		-- dynlight.Pos = data:GetOrigin()
+		-- dynlight.Size = 256
+		-- dynlight.Decay = 220
+		-- dynlight.R = 255
+		-- dynlight.G = 130
+		-- dynlight.B = 40
+		-- dynlight.Brightness = 5
+		-- dynlight.DieTime = CurTime() + 1
 end
 
 function EFFECT:Think()

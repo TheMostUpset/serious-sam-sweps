@@ -540,11 +540,11 @@ function SWEP:CalcViewModelView(vm, oldpos, oldang, pos, ang)
 	
 	if cvar_bob:GetBool() then
 		local Length = reg.Vector.Length2D
-		local speed = Length(ownerVelocity)
-		speed = math.Clamp(speed/256, 0, .4)
+		local xyspeed = Length(ownerVelocity)
+		xyspeed = math.Clamp(xyspeed/256, 0, .4)
 		local bobspeed = self.SBobSpeed
 		local sine = math.sin(CurTime() * bobspeed)
-		local bobright = sine * speed
+		local bobright = sine * xyspeed
 		local bobup = sine * bobright / 2
 		local bobscale = self.SBobScale * math.Clamp(-vertOffset + 1, 0, 1)
 		

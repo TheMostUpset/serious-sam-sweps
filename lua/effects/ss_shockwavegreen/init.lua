@@ -4,14 +4,24 @@ function EFFECT:Init(data)
 	self.DieTime = 1
 	self.Size = 0
 	self.Scale = data:GetScale()
+	
+	-- if !cvars.Bool("ss_firelight") then return end
+	-- local dynlight = DynamicLight(self:EntIndex())
+		-- dynlight.Pos = data:GetOrigin()
+		-- dynlight.Size = 32
+		-- dynlight.Decay = 100
+		-- dynlight.R = 40
+		-- dynlight.G = 255
+		-- dynlight.B = 50
+		-- dynlight.Brightness = 1
+		-- dynlight.DieTime = CurTime() + .5
 end
 
 function EFFECT:Think()
 	self.DieTime = self.DieTime + FrameTime()
 	self.Size = self.Scale * self.DieTime^(2.5)
-	if self.DieTime >= 1.4 then return false end
 	
-	return true
+	return self.DieTime < 1.4
 end
 
 function EFFECT:Render()

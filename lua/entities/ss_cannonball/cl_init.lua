@@ -9,7 +9,6 @@ function ENT:Draw()
 	if self:WaterLevel() >= 2 or self:GetPower() < 505 or self:GetVelocity():Length() < 2200 or (CurTime() - self:GetCreationTime()) < .04 then return end
 	
 	local pos = self:GetPos()
-	local vel = self:GetVelocity()
 	
 	local flame = self.emitter:Add("effects/fire_cloud1", pos)
 	if flame then
