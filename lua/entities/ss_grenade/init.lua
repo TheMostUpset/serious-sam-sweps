@@ -31,7 +31,7 @@ ENT.HitNormal = Vector(0,0,0)
 
 function ENT:PhysicsCollide(data, phys)
 	self.HitNormal = data.HitNormal
-	if self.ExplodeOnWallHit and data.Speed >= self.ExplodeOnWallHitSpeed then
+	if self.ExplodeOnWallHit and data.HitEntity:IsWorld() and data.Speed >= self.ExplodeOnWallHitSpeed then
 		self:Explode()
 	else
 		if data.DeltaTime > 0.05 then self:EmitSound("weapons/serioussam/grenadelauncher/Bounce.wav") end
