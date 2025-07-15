@@ -14,7 +14,11 @@ SeriousPlayerSounds.ModelTable = {
 	["models/pechenko_121/samclassic_pirate.mdl"] = true,
 	["models/pechenko_121/samclassic_santa.mdl"] = true,
 	["models/pechenko_121/samclassic_tfe.mdl"] = true,
-	["models/pechenko_121/skinlessstan.mdl"] = true
+	["models/pechenko_121/skinlessstan.mdl"] = true,
+	["models/pechenko_121/boxerbarry.mdl"] = true,
+	["models/pechenko_121/mightymarvin.mdl"] = true,
+	["models/pechenko_121/fastfingerfreddy.mdl"] = true,
+	["models/pechenko_121/rockingryan.mdl"] = true
 }
 
 function SeriousPlayerSounds:IsEnabled()
