@@ -13,9 +13,9 @@ end
 
 function SWEP:PrimaryAttack()
 	if !self:CanPrimaryAttack() then return end
-	local delay, dmg = self.Primary.Delay, self.Primary.Damage
+	local delay, dmg, splash = self.Primary.Delay, self.Primary.Damage, self.Primary.DamageSplash
 	if self:IsDeathmatchRules() then
-		delay, dmg = self.Primary.DelayDM, self.Primary.DamageDM
+		delay, dmg, splash = self.Primary.DelayDM, self.Primary.DamageDM, self.Primary.DamageSplashDM
 	end
 	self:SetNextPrimaryFire(CurTime() + delay)
 	self:SendWeaponAnim(ACT_VM_PRIMARYATTACK)
@@ -23,11 +23,11 @@ function SWEP:PrimaryAttack()
 	self:WeaponSound(self.Primary.Sound)
 	self:TakeAmmo(1)
 	self:IdleStuff()
-	self:CreateRocket(dmg)
+	self:CreateRocket(dmg, splash)
 	self:HolsterDelay()
 end
 
-function SWEP:CreateRocket(dmg)
+function SWEP:CreateRocket(dmgDirect, dmgSplash)
 	if SERVER then
 		local pos = self.Owner:GetShootPos()
 		local ang = self.Owner:GetAimVector():Angle()
@@ -36,7 +36,7 @@ function SWEP:CreateRocket(dmg)
 		ent:SetAngles(ang)
 		ent:SetPos(pos)
 		ent:SetOwner(self.Owner)
-		ent:SetDamage(dmg)
+		ent:SetDamage(dmgDirect, dmgSplash)
 		ent:SetVelocity(ang:Up() *40 +ang:Forward() *1500)
 		ent:Spawn()
 	end
@@ -70,8 +70,10 @@ SWEP.ViewModel			= "models/weapons/serioussam/v_rocketlauncher.mdl"
 SWEP.WorldModel			= "models/weapons/serioussam/w_rocketlauncher.mdl"
 
 SWEP.Primary.Sound			= Sound("weapons/serioussam/rocketlauncher/fire.wav")
-SWEP.Primary.Damage			= 100
-SWEP.Primary.DamageDM		= 80
+SWEP.Primary.Damage			= 100 -- direct damage
+SWEP.Primary.DamageSplash	= 50 -- splash damage
+SWEP.Primary.DamageDM		= 75 -- direct damage in DM
+SWEP.Primary.DamageSplashDM	= 75 -- splash damage in DM
 SWEP.Primary.Delay			= .7
 SWEP.Primary.DelayDM		= .6
 SWEP.Primary.DefaultClip	= 5

@@ -19,14 +19,6 @@ function ENT:Initialize()
 	end
 end
 
-function ENT:SetExplodeDelay(flDelay)
-	self.delayExplode = CurTime() + flDelay
-end
-
-function ENT:SetDamage(dmg)
-	self.Damage = dmg
-end
-
 ENT.HitNormal = Vector(0,0,0)
 
 function ENT:PhysicsCollide(data, phys)
@@ -48,24 +40,10 @@ function ENT:Think()
 	self:Explode()
 end
 
-function ENT:ExplosionEffects(pos, ang)
-	local effectdata = EffectData()
-	effectdata:SetAngles(ang)
-	effectdata:SetOrigin(pos)
-	effectdata:SetScale(3.8)
-	util.Effect("ss_shockwave", effectdata)
+function ENT:Explode(exppos, hitnorm, hitEnt)
+	if self.Exploded then return end
+	self.Exploded = true
 	
-	local explosion = EffectData()
-	explosion:SetOrigin(pos)
-	explosion:SetMagnitude(3)
-	explosion:SetScale(2)
-	explosion:SetRadius(4)
-	util.Effect("Sparks", explosion)
-	util.Effect("ss_exprocket", explosion)
-	util.Effect("ss_expparticles", explosion)
-end
-
-function ENT:Explode(exppos, hitnorm)
 	local pos = self:GetPos()
 	exppos = exppos or pos
 	
@@ -91,20 +69,19 @@ function ENT:Explode(exppos, hitnorm)
 	self:EmitSound("weapons/serioussam/Explosion02.wav", 100, 100)
 	local owner = self:GetOwner()
 	if !IsValid(owner) then owner = self end
-	util.BlastDamage(self, owner, pos, 256, self.Damage)
+	self:DoSplashDamage(pos, self.DamageSplash, owner)
+	self:DoDirectDamage(hitEnt, self.DamageDirect, owner)
 	self:Remove()
 end
 
 function ENT:StartTouch(ent)
 	if ent:IsValid() and ent:IsPlayer() or ent:IsNPC() or ent:Health() > 0 then
- 		self:Explode(ent:GetPos())
+ 		self:Explode(ent:GetPos(), nil, ent)
 	end
 end
-ENT.Exploded = nil
+
 function ENT:OnTakeDamage(dmginfo)
-	if self.Exploded then return end
-	if dmginfo:GetInflictor() != self and dmginfo:IsExplosionDamage() and dmginfo:GetDamage() > 50 then
-		self.Exploded = true
+	if dmginfo:GetInflictor() != self and dmginfo:GetDamage() >= 20 then
 		self:Explode()
 	end
 end

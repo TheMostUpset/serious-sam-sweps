@@ -38,11 +38,6 @@ function SWEP:Release()
 	local attdelay = self:GetAttackDelay()
 	local pos = self.Owner:GetShootPos()
 	local ang = self.Owner:GetAimVector():Angle()
-	//Wiki says:
-	//A maximally-charged grenade deals more damage than a rocket
-	//but i fucking dont know HOW EXACTLY more damage
-	local damage = math.Clamp(self.Primary.Damage *(CurTime() - attdelay+1.65), self.Primary.Damage, 120)
-	damage = math.Round(damage)
 	pos = pos +ang:Forward() *10 +ang:Right() *2 +ang:Up() *-8
 	if SERVER then
 		local ent = ents.Create("ss_grenade")
@@ -50,7 +45,7 @@ function SWEP:Release()
 		ent:SetAngles(ang)
 		ent:SetOwner(self.Owner)
 		ent:SetExplodeDelay(2.5)
-		ent:SetDamage(damage)
+		ent:SetDamage(self.Primary.Damage, self.Primary.DamageSplash)
 		ent:Spawn()
 		ent:Activate()
 		local phys = ent:GetPhysicsObject()
@@ -78,7 +73,8 @@ SWEP.ViewModel			= "models/weapons/serioussam/v_grenadelauncher.mdl"
 SWEP.WorldModel			= "models/weapons/serioussam/w_grenadelauncher.mdl"
 
 SWEP.Primary.Sound			= Sound("weapons/serioussam/grenadelauncher/Fire.wav")
-SWEP.Primary.Damage			= 75
+SWEP.Primary.Damage			= 75 -- direct damage
+SWEP.Primary.DamageSplash	= 100 -- splash damage
 SWEP.Primary.Delay			= .3
 SWEP.Primary.DefaultClip	= 5
 SWEP.Primary.Ammo			= "Grenade"
