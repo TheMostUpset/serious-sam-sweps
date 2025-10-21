@@ -54,14 +54,26 @@ function SWEP:OnHit(tr)
 end
 
 function SWEP:DoDamage(tr)
-	local dmginfo = DamageInfo()
+	local dmg = self.Primary.Damage
 	local attacker = self.Owner
 	if !IsValid(attacker) then attacker = self end
+	local victim = tr.Entity
+	
+	-- backstab
+	if self:IsDeathmatchRules() and IsValid(victim) and victim:IsPlayer() then
+		local dir = (attacker:GetPos() - victim:GetPos()):GetNormalized()
+		local dot = victim:GetForward():Dot(dir)
+		if dot < -0.45 then
+			dmg = dmg * 10
+		end
+	end
+	
+	local dmginfo = DamageInfo()
 	dmginfo:SetAttacker(attacker)
 	dmginfo:SetInflictor(self)
-	dmginfo:SetDamage(self.Primary.Damage)
+	dmginfo:SetDamage(dmg)
 	dmginfo:SetDamageForce(self.Owner:GetUp() *3000 +self.Owner:GetForward() *12000 +self.Owner:GetRight() *-1500)
-	tr.Entity:DispatchTraceAttack(dmginfo, tr)
+	victim:DispatchTraceAttack(dmginfo, tr)
 end
 
 function SWEP:ImpactEffect(tr)
@@ -89,7 +101,7 @@ SWEP.ViewModel			= "models/weapons/serioussam/v_knife.mdl"
 SWEP.WorldModel			= "models/weapons/serioussam/w_knife.mdl"
 
 SWEP.Primary.Sound			= Sound("weapons/serioussam/knife/Back.wav")
-SWEP.Primary.Damage			= 120
+SWEP.Primary.Damage			= 100
 SWEP.Primary.Delay			= .83
 SWEP.HitDist				= 65
 
