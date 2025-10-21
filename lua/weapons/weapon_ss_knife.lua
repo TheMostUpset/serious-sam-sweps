@@ -78,11 +78,15 @@ end
 
 function SWEP:ImpactEffect(tr)
 	if !IsFirstTimePredicted() then return end
+	local dmgtype = DMG_SLASH
+	if tr.Entity:IsPlayer() then
+		dmgtype = DMG_CLUB -- fixes decals on players
+	end
 	local e = EffectData()
 	e:SetOrigin(tr.HitPos)
 	e:SetStart(tr.StartPos)
 	e:SetSurfaceProp(tr.SurfaceProps)
-	e:SetDamageType(DMG_SLASH)
+	e:SetDamageType(dmgtype)
 	e:SetHitBox(tr.HitBox)
 	if CLIENT then
 		e:SetEntity(tr.Entity)
