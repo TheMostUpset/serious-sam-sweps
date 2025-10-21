@@ -184,10 +184,10 @@ SWEP.WorldModel			= "models/weapons/serioussam/w_sniper.mdl"
 
 SWEP.Primary.Sound			= Sound("weapons/serioussam/sniper/Fire.wav")
 SWEP.Primary.Special1		= Sound("weapons/serioussam/sniper/Zoom.wav")
-SWEP.Primary.Damage			= 70
-SWEP.Primary.DamageDM		= 50
+SWEP.Primary.Damage			= 75
+SWEP.Primary.DamageDM		= 30
 SWEP.Primary.DamageZoom		= 300
-SWEP.Primary.DamageZoomDM	= 100
+SWEP.Primary.DamageZoomDM	= 90
 SWEP.Primary.Cone			= .001
 SWEP.Primary.Delay			= 1.4
 SWEP.Primary.DefaultClip	= 15
