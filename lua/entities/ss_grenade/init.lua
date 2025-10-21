@@ -13,6 +13,7 @@ function ENT:Initialize()
 	self:SetSolid(SOLID_VPHYSICS)
 	local phys = self:GetPhysicsObject()
 	if phys:IsValid() then
+		phys:AddGameFlag(FVPHYSICS_NO_IMPACT_DMG)
 		phys:SetMass(5)
 		phys:Wake()
 		phys:AddAngleVelocity(Vector(math.random(-1,1) *300,-200,0))
