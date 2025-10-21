@@ -38,9 +38,7 @@ SWEP.WorldModel			= "models/weapons/serioussam/w_tommygun.mdl"
 
 SWEP.Primary.Sound			= Sound("weapons/serioussam/tommygun/Fire.wav")
 SWEP.Primary.Cone			= .015
-SWEP.Primary.ConeDM			= .01
 SWEP.Primary.Delay			= .09
-SWEP.Primary.DelayDM		= .077
 SWEP.Primary.DefaultClip	= 50
 SWEP.Primary.Ammo			= "smg1"
 

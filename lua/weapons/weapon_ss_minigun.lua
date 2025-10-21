@@ -185,10 +185,10 @@ SWEP.Primary.Sound			= Sound("weapons/serioussam/minigun/Fire.wav")
 SWEP.Primary.Special		= Sound("Weapon_Sam_MiniGun.Click")
 SWEP.Primary.Special1		= Sound("weapons/serioussam/minigun/Rotate.wav")
 SWEP.Primary.Cone			= .015
-SWEP.Primary.ConeDM			= .025
+SWEP.Primary.ConeDM			= .015
 SWEP.Primary.DamageDM		= 20
 SWEP.Primary.Delay			= .05
-SWEP.Primary.DelayDM		= .078
+SWEP.Primary.DelayDM		= .05
 SWEP.Primary.DefaultClip	= 100
 SWEP.Primary.Ammo			= "smg1"
 
