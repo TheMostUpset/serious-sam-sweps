@@ -53,6 +53,9 @@ function SWEP:Release()
 			local vel = ang:Forward() *2200 *(CurTime() - attdelay+.95) +ang:Up() *100
 			phys:SetVelocity(vel)
 		end
+		if self:IsDeathmatchRules() then
+			ent.ExplodeOnWallHit = false
+		end
 	end
 	self:OnRemove()
 end
