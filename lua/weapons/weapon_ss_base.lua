@@ -631,6 +631,8 @@ function SWEP:DrawHUD()
 end
 
 local cvar_crosshair = CreateClientConVar("ss_crosshair", 1)
+local cvar_crosshair_static = CreateClientConVar("ss_crosshair_static", 0)
+local cvar_crosshair_scale = CreateClientConVar("ss_crosshair_scale", 1)
 local crosshair_table = {
 	surface.GetTextureID("vgui/serioussam/Crosshair1"),
 	surface.GetTextureID("vgui/serioussam/Crosshair2"),
@@ -648,9 +650,13 @@ function SWEP:Crosshair()
 		local coords = tr.HitPos:ToScreen()
 		x, y = coords.x, coords.y
 	end
-
-	local dist = math.Round(-self.Owner:GetPos():Distance(tr.HitPos) /12) +64
-	dist = math.Clamp(dist, 32, 128)
+	
+	local scale = 32
+	if !cvar_crosshair_static:GetBool() then
+		local dist = math.Round(-self.Owner:GetPos():Distance(tr.HitPos) /12) +64
+		scale = math.Clamp(dist, 32, 128)
+	end
+	scale = scale * math.Clamp(cvar_crosshair_scale:GetFloat(), .1, 16)
 
 	local getcvar = cvar_crosshair:GetInt()
 	if getcvar <= 0 or getcvar > #crosshair_table then return end
@@ -670,5 +676,5 @@ function SWEP:Crosshair()
 	
 	surface.SetTexture(crosshair_table[getcvar])
 	surface.SetDrawColor(colr, colg, colb, 255)
-	surface.DrawTexturedRect(x - dist /2 -1, y - dist /2 +1, dist, dist)
+	surface.DrawTexturedRect(x - scale /2 -1, y - scale /2 +1, scale, scale)
 end
