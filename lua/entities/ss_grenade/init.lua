@@ -82,7 +82,12 @@ function ENT:StartTouch(ent)
 end
 
 function ENT:OnTakeDamage(dmginfo)
-	if dmginfo:GetInflictor() != self and dmginfo:GetDamage() >= 20 then
+	if dmginfo:GetInflictor() != self and dmginfo:GetDamage() >= 20 and dmginfo:IsDamageType(bit.bor(DMG_BLAST, DMG_ENERGYBEAM)) then
+		-- if exploded by another player, make them an owner
+		local attacker = dmginfo:GetAttacker()
+		if IsValid(attacker) and attacker:IsPlayer() and attacker != self:GetOwner() then
+			self:SetOwner(attacker)
+		end
 		self:Explode()
 	end
 end
