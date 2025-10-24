@@ -44,7 +44,7 @@ function SWEP:Release()
 		ent:SetPos(pos)
 		ent:SetAngles(ang)
 		ent:SetOwner(self.Owner)
-		ent:SetExplodeDelay(2.5)
+		ent:SetExplodeDelay(self.Primary.DelayExplode)
 		ent:SetDamage(self.Primary.Damage, self.Primary.DamageSplash)
 		ent:Spawn()
 		ent:Activate()
@@ -79,6 +79,7 @@ SWEP.Primary.Sound			= Sound("weapons/serioussam/grenadelauncher/Fire.wav")
 SWEP.Primary.Damage			= 75 -- direct damage
 SWEP.Primary.DamageSplash	= 100 -- splash damage
 SWEP.Primary.Delay			= .3
+SWEP.Primary.DelayExplode	= 2.5 -- grenade explosion delay
 SWEP.Primary.DefaultClip	= 5
 SWEP.Primary.Ammo			= "Grenade"
 
